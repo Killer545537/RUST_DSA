@@ -4,9 +4,12 @@ mod arrays;
 mod binary_search;
 mod linked_lists;
 
-fn main() {
-    let arr = [10, 20, 30, 40];
+use linked_lists::*;
 
-    let v: Option<i32> = arr.iter().enumerate().map(|(i, _)| std::cmp::max(arr[..=i].iter().sum::<i32>(), arr[i+1..].iter().sum::<i32>())).min();
-    println!("{v:?}")
+fn main() {
+    let mut ll = linked_lists::LinkedList::new();
+    ll.push_front(2);
+    ll.push_back(4);
+    ll.push_front(1);
+    println!("{}", ll);
 }
