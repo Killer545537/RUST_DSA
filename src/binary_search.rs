@@ -396,6 +396,174 @@ pub fn smallest_divisor(arr: &[i32], threshold: i32) -> i32 {
     low
 }
 
+pub fn ship_within_days(weights: &[i32], days: i32) -> i32 {
+    //The days taken != ceil(total/capacity) since the weights are not equally distributed and cannot be rearranged
+    let days_taken = |capacity: i32| -> i32 {
+        weights.iter().fold((0, 1), |(total, days), &weight| {
+            if total + weight > capacity {
+                (weight, days + 1)
+            } else {
+                (total + weight, days)
+            }
+        }).1
+    };
+
+    let (mut low, mut high) = (*weights.iter().max().unwrap(), weights.iter().sum());
+
+    while low <= high {
+        let mid = (low + high) / 2;
+        match days.cmp(&days_taken(mid)) {
+            Ordering::Greater | Ordering::Equal => high = mid - 1, //If fewer days are being taken, the answer is on the left
+            Ordering::Less => low = mid + 1,
+        }
+    }
+
+    low
+}
+
+pub fn find_kth_positive(arr: &[i32], k: i32) -> i32 {
+    let (mut low, mut high) = (0, arr.len());
+
+    while low < high {
+        let mid = (low + high) / 2;
+        /*  If all the numbers were present the array would look like ->
+        Index -> 0 1 2 3 4 5 6
+        Ele   -> 1 2 3 4 5 6 7 (i + 1)
+        So, the number of missing elements till an index 'i' is arr[i] - (i + 1)  */
+        let missing = arr[mid] - (mid as i32 + 1);
+
+        if missing < k {
+            low = mid + 1;
+        } else {
+            high = mid;
+        }
+    }
+
+    /*  Now, after finding the high, the kth missing number will be,
+    arr[high] + more (more is the number of missing left after high)
+    more = k - missing
+    arr[high] + more = arr[high] + k - missing = high + 1 + k  = low + k */
+    low as i32 + k
+}
+
+pub fn find_kth_positive_simpler(arr: &[i32], k: i32) -> i32 {
+    (1..)
+        .filter(|x| arr.binary_search(x).is_err())
+        .nth(k as usize - 1)
+        .unwrap()
+}
+
+//In this problem we need to place the cows in the stalls
+//In any given configuration we can find the distance between any two cows as stalls[i] - stalls[j]
+//We need to find the max(minimum distance) in a given configuration
+//Good way to remember how to return low/high, if low is possible at the end it will switch and point to an impossible case and similarly for high
+pub fn aggressive_cows(stalls: &[i32], cows: i32) -> i32 {
+    let mut stalls = stalls.to_vec();
+    stalls.sort();
+    let (mut low, mut high) = (1, *stalls.last().unwrap() - *stalls.first().unwrap());
+    let possible_distance = |distance: i32| -> bool {
+        let mut number_cows = 1;
+        let mut last_stall = stalls[0];
+
+        for &stall in stalls.iter() {
+            if stall - last_stall >= distance {
+                number_cows += 1;
+                last_stall = stall;
+            }
+        }
+
+        return if number_cows >= cows {
+            true
+        } else {
+            false
+        };
+    };
+
+    while low <= high {
+        let mid = (low + high) / 2;
+
+        if possible_distance(mid) {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+
+    high
+}
+
+//Here, each student must be given at least one book (if more, then in a contiguous manner)
+//Allocate books in such a way that the maximum number of pages given to a student is minimum, min(max(pages to a student))
+pub fn allocate_books(books: &[i32], students: i32) -> Option<i32> {
+    //The only case when it is not possible to allocate books,
+    if students > books.len() as i32 {
+        return None;
+    }
+
+    let (mut low, mut high) = (*books.iter().max().unwrap(), books.iter().sum());
+    let students_allocated = |pages: i32| -> i32 {//pages -> maximum pages a student can read
+        books.iter().fold((1, 0), |(students, allocated), &book| {
+            if allocated + book <= pages {
+                (students, allocated + book)
+            } else {
+                (students + 1, book)
+            }
+        }).0
+    };
+
+    while low <= high {
+        let mid = (low + high) / 2;
+
+        if students_allocated(mid) > students {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+
+    Some(low)
+}
+
+//Here, we have two painters which take arr[i] time to do a task, we need to find the min of the maximum time taken (take only contiguous sub-arrays as tasks)
+pub fn painter_partition(arr: &[i32]) -> Option<i32> {
+    arr.iter().enumerate()
+        .map(|(i, _)| std::cmp::max(arr[..=i].iter().sum(), arr[i + 1..].iter().sum()))
+        .min()
+}
+
+//Here, we need to split the array into k parts that the maximum sub-array is minimum (empty sub-arrays are not allowed)
+//Exactly the same problem as allocate_books
+pub fn split_array(arr: &[i32], k: i32) -> i32 {
+    let partitions = |possible_sum: i32| -> i32 {
+        arr.iter().fold((1, 0), |(parts, sum), &current| {
+            if sum + current <= possible_sum {
+                (parts, sum + current)
+            } else {
+                (parts + 1, current)
+            }
+        }).1
+    };
+
+    let (mut low, mut high) = (*arr.iter().max().unwrap(), arr.iter().sum());
+
+    while low <= high {
+        let mid = (low + high) / 2;
+
+        if partitions(mid) > k {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+
+    low
+}
+
+pub fn minimize_max_distance(coordinates: &[f32], new_stations: i32) { //The new gas stations can be placed between two coordinates such that it is fractional
+    //Clearly, it is always disadvantageous to add new coordinates to the left or right
+    //If we need to place one station, we should place it in the largest gap
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -489,5 +657,35 @@ mod tests {
         assert_eq!(smallest_divisor(&[1, 2, 5, 9], 6), 5);
         assert_eq!(smallest_divisor(&[44, 22, 33, 11, 1], 5), 44);
         assert_eq!(smallest_divisor(&[21212, 10101, 12121], 1000000), 1);
+    }
+
+    #[test]
+    fn shipper_test() {
+        assert_eq!(ship_within_days(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5), 15);
+        assert_eq!(ship_within_days(&[3, 2, 2, 4, 1, 4], 3), 6);
+        assert_eq!(ship_within_days(&[1, 2, 3, 1, 1], 4), 3);
+    }
+
+    #[test]
+    fn missing_test() {
+        assert_eq!(find_kth_positive(&[2], 1), 1);
+        assert_eq!(find_kth_positive(&[2, 3, 4, 7, 11], 5), 9);
+        assert_eq!(find_kth_positive(&[1, 2, 3, 4], 2), 6);
+    }
+
+    #[test]
+    fn missing_simpler_test() {
+        assert_eq!(find_kth_positive_simpler(&[2], 1), 1);
+    }
+
+    #[test]
+    fn aggressive_test() {
+        assert_eq!(aggressive_cows(&[1, 2, 3, 4, 7], 3), 3);
+        assert_eq!(aggressive_cows(&[5, 4, 3, 2, 1, 1000000000], 2), 999999999);
+    }
+
+    #[test]
+    fn allocation_test() {
+        assert_eq!(allocate_books(&[12, 34, 67, 90], 2), Some(113));
     }
 }
