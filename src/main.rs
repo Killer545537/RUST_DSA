@@ -3,8 +3,7 @@
 mod arrays;
 mod binary_search;
 mod linked_lists;
-
-use linked_lists::*;
+mod doubly_linked_list;
 
 fn main() {
     let mut ll = linked_lists::LinkedList::new();

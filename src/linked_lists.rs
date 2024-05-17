@@ -4,7 +4,6 @@ It can be used to implement stacks, queues, etc.
 Rust has a built-in linked-list data-type LinkedList in the std::collections module (This is actually a doubly linked list)*/
 
 use std::fmt::{Display, Formatter};
-use std::ptr::write;
 
 struct Node<T> {
     value: T,
@@ -26,11 +25,11 @@ pub struct LinkedList<T> {
     head: Option<Box<Node<T>>>,
 }
 
-impl<T> LinkedList<T> {
+impl<T: Copy> LinkedList<T> {
     pub fn new() -> Self {
         LinkedList { head: None }
     }
-
+    ///Add an element to the front
     pub fn push_front(&mut self, value: T) {
         let mut node = Box::new(Node::new(value));
 
@@ -42,7 +41,7 @@ impl<T> LinkedList<T> {
             }
         }
     }
-
+    ///Add an element to the end of the list
     pub fn push_back(&mut self, value: T) {
         let node = Box::new(Node::new(value));
         let mut current = &mut self.head;
@@ -53,23 +52,60 @@ impl<T> LinkedList<T> {
 
         *current = Some(node);
     }
+    //option.take() is a method which takes the value out of the option, leaving a None in its place.
+    pub fn reverse(&mut self) {
+        let mut current_head = self.head.take();
 
-
+        while let Some(mut current_node) = current_head {
+            let current_next = current_node.next.take();
+            current_node.next = self.head.take();
+            self.head = Some(current_node);
+            current_head = current_next;
+        }
+    }
+    ///Delete the first node
+    pub fn delete_front(&mut self) -> Result<T, &'static str> {
+        match self.head.take() { //Take head since we are 'defo' changing it
+            None => Err("List is empty"),//If the head is none, then the list is empty and cannot be deleted
+            Some(mut old_head) => {
+                //Free is done automatically by .take()
+                self.head = old_head.next.take();
+                Ok(old_head.value)
+            }
+        }
+    }
+    ///Delete the last node in the list
+    pub fn delete_back(&mut self) -> Result<T, &'static str> {
+        match self.head.as_mut() { //Take head as mut since we are modifying it 'maybe'
+            None => Err("List is empty"),
+            Some(head) => {
+                if head.next.is_none() {
+                    return Ok(self.head.take().unwrap().value);
+                }
+                let mut current = head;
+                while current.next.as_ref().unwrap().next.is_some() { //Move to the second last node
+                    current = current.next.as_mut().unwrap();
+                }
+                let result = current.next.take().unwrap().value;
+                Ok(result)
+            }
+        }
+    }
 }
-
+//Println
 impl<T: Display> Display for LinkedList<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-       let mut current = &self.head;
+        let mut current = &self.head;
         let mut result = String::new();
 
         while let Some(node) = current {
             result.push_str(&format!("{}", node.value));
             if node.next.is_some() {
-                result.push_str(", ");
+                result.push_str(" ➡️ ");
             }
             current = &node.next;
         }
-
+        result.push_str(" ➡️ NULL");
         write!(f, "[{}]", result)
     }
 }
