@@ -562,6 +562,186 @@ pub fn split_array(arr: &[i32], k: i32) -> i32 {
 pub fn minimize_max_distance(coordinates: &[f32], new_stations: i32) { //The new gas stations can be placed between two coordinates such that it is fractional
     //Clearly, it is always disadvantageous to add new coordinates to the left or right
     //If we need to place one station, we should place it in the largest gap
+    todo!()
+}
+
+pub fn find_median_sorted_arrays(arr1: &[i32], arr2: &[i32]) -> f32 {
+    //The median is the middle most data in a sorted set
+    //If the number of elements is odd, the middle can be found by n/2
+    //If the number of elements is even, the median is the mean of the middle two elements (arr[(n/2-1]+arr[n/2])/2
+    let (n1, n2) = (arr1.len(), arr2.len());
+    let n = n1 + n2;
+    let left = (n + 1) / 2; //Number of elements to the left of the median
+    //Always perform Binary Search on the smaller
+    if n1 > n2 {
+        return find_median_sorted_arrays(arr2, arr1);
+    }
+
+    let (mut low, mut high) = (0, n1);
+
+    while low <= high {
+        let mid1 = (low + high) / 2; //This is the number of elements to choose from arr1 to go to the left half of the sorted array
+        let mid2 = left - mid1; //Number of elements to the right of the median
+
+        let (r1, r2) = (*arr1.get(mid1).unwrap_or(&i32::MAX), *arr2.get(mid2).unwrap_or(&i32::MAX));
+        let l1 = *mid1.checked_sub(1).and_then(|i| arr1.get(i)).unwrap_or(&i32::MIN);
+        let l2 = *mid2.checked_sub(1).and_then(|i| arr2.get(i)).unwrap_or(&i32::MIN);
+
+        if l1 <= r2 && l2 <= r1 {
+            return if n % 2 == 1 { //If the number of elements is odd
+                std::cmp::max(l1, l2) as f32
+            } else { //If the number of elements is even
+                (std::cmp::max(l1, l2) + std::cmp::min(r1, r2)) as f32 / 2.0
+            };
+        } else if l1 > r2 {
+            high = mid1 - 1;
+        } else {
+            low = mid1 + 1;
+        }
+    }
+
+    -1.0 //This is not possible, but code...
+}
+
+pub fn find_kth_sorted(arr1: &[i32], arr2: &[i32], k: usize) -> i32 {
+    //This is similar to find_median_sorted_arrays, but we will not find the partition point (median) but the number of elements (k) till there
+    let (n1, n2) = (arr1.len(), arr2.len());
+    let n = n1 + n2;
+    let left = (n + 1) / 2; //Number of elements to the left of the median
+    //Always perform Binary Search on the smaller
+    if n1 > n2 {
+        return find_kth_sorted(arr2, arr1, k);
+    }
+
+    let (mut low, mut high) = (std::cmp::max(0, k - n2), std::cmp::min(k, n1));
+
+    while low <= high {
+        let mid1 = (low + high) / 2; //This is the number of elements to choose from arr1 to go to the left half of the sorted array
+        let mid2 = left - mid1; //Number of elements to the right of the median
+
+        let (r1, r2) = (*arr1.get(mid1).unwrap_or(&i32::MAX), *arr2.get(mid2).unwrap_or(&i32::MAX));
+        let l1 = match mid1.checked_sub(1) {
+            None => i32::MIN,
+            Some(ind) => arr1[ind]
+        };
+        let l2 = match mid2.checked_sub(1) {
+            None => i32::MIN,
+            Some(ind) => arr2[ind]
+        };
+
+        if l1 <= r2 && l2 <= r1 {
+            return std::cmp::max(l1, l2);
+        } else if l1 > r2 {
+            high = mid1 - 1;
+        } else {
+            low = mid1 + 1;
+        }
+    }
+
+    0
+}
+
+pub fn row_with_max_1s(matrix: &Vec<Vec<i32>>) -> Option<usize> { //Here, we are given a matrix of 0s and 1s, with each row being sorted
+    let (mut max_index, mut max_1s) = (None, None);
+
+    for (i, row) in matrix.iter().enumerate() {
+        if let Some(one_index) = lower_bound(row, 1) {
+            if row.len() - one_index > max_1s.unwrap_or(0) {
+                max_1s = Some(row.len() - one_index);
+                max_index = Some(i);
+            }
+        }
+    }
+
+    max_index //None if no row contains a 1
+}
+
+///Here, the matrix is sorted in the Row-Major Sense
+pub fn search_matrix(matrix: &Vec<Vec<i32>>, target: i32) -> Option<(usize, usize)> {
+    let (n, m) = (matrix.len(), matrix[0].len());
+    let address_to_cell = |address: usize| -> (usize, usize) {
+        (address / m, address % m)
+    };
+    let (mut low, mut high) = (0, n * m);
+
+    while low < high {
+        let mid = (low + high) / 2;
+
+        let (row, col) = address_to_cell(mid);
+        match matrix[row][col].cmp(&target) {
+            Ordering::Equal => {
+                return Some((row, col));
+            }
+            Ordering::Greater => high = mid,
+            Ordering::Less => low = mid + 1
+        }
+    }
+
+    None
+}
+
+///Here, the rows and the columns are sorted
+pub fn search_matrix_again(matrix: &Vec<Vec<i32>>, target: i32) -> Option<(usize, usize)> {
+    let (mut row, mut col) = (0, matrix[0].len() - 1); //Starting at the top right
+
+    while row < matrix.len() {
+        match matrix[row][col].cmp(&target) {
+            Ordering::Equal => {
+                return Some((row, col));
+            }
+            Ordering::Less => row += 1, //Eliminating the current row and moving down
+            Ordering::Greater if col > 0 => col -= 1, //Eliminating the current col and moving left
+            Ordering::Greater => break
+        }
+    }
+
+    None
+}
+
+pub fn find_peak_grid(matrix: &Vec<Vec<i32>>) -> Option<(usize, usize)> {
+    let (mut low, mut high) = (0, matrix[0].len() - 1);
+
+    while low <= high {
+        let mid = (low + high) / 2;
+        let row = matrix.iter().map(|row| row[mid])
+            .enumerate()
+            .max_by(|&a, &b| a.1.cmp(&b.1))
+            .unwrap().0; //Row number of the max element in matrix[][mid]
+        let left_element = *mid.checked_sub(1).and_then(|i| matrix[row].get(i)).unwrap_or(&-1);
+        let right_element = *matrix[row].get(mid + 1).unwrap_or(&-1);
+
+        if matrix[row][mid] > left_element && matrix[row][mid] > right_element {
+            return Some((row, mid));
+        } else if matrix[row][mid] < left_element {
+            high = mid - 1;
+        } else {
+            low = mid + 1;
+        }
+    }
+
+    None
+}
+
+pub fn find_peak_grid_row(matrix: &Vec<Vec<i32>>) -> Option<(usize, usize)> { //Gives TLE
+    let (mut low, mut high) = (0, matrix.len());
+
+    while low < high {
+        let mid = (low + high) / 2;
+        let col = matrix[mid].iter().enumerate().max_by(|&a, &b| a.1.cmp(b.1)).unwrap().0;
+
+        let up_element = *mid.checked_sub(1).and_then(|i| matrix[i].get(col)).unwrap_or(&-1);
+        let down_element = *matrix.get(mid + 1).and_then(|row| row.get(col)).unwrap_or(&-1);
+
+        if matrix[mid][col] > up_element && matrix[mid][col] > down_element {
+            return Some((mid, col));
+        } else if matrix[mid][col] < up_element {
+            high = mid;
+        } else {
+            low = mid - 1;
+        }
+    }
+
+    None
 }
 
 #[cfg(test)]
@@ -687,5 +867,45 @@ mod tests {
     #[test]
     fn allocation_test() {
         assert_eq!(allocate_books(&[12, 34, 67, 90], 2), Some(113));
+    }
+
+    #[test]
+    fn find_median_test() {
+        assert_eq!(find_median_sorted_arrays(&[1, 3], &[2]), 2.0);
+        assert_eq!(find_median_sorted_arrays(&[1, 2], &[3, 4]), 2.5);
+    }
+
+    #[test]
+    fn row_with_max_1s_test() {
+        assert_eq!(row_with_max_1s(&vec![vec![1, 1, 1], vec![0, 0, 1], vec![0, 0, 0]]), Some(0));
+        assert_eq!(row_with_max_1s(&vec![vec![1, 1], vec![1, 1]]), Some(0));
+    }
+
+    #[test]
+    fn search_matrix_test() {
+        assert_eq!(search_matrix(&vec![vec![1, 3, 5, 7], vec![10, 11, 16, 20], vec![23, 30, 34, 60]], 3), Some((0, 1)));
+        assert_eq!(search_matrix(&vec![vec![1, 3, 5, 7], vec![10, 11, 16, 20], vec![23, 30, 34, 60]], 13), None);
+    }
+
+    #[test]
+    fn search_matrix_again_test() {
+        assert_eq!(search_matrix_again(&vec![
+            vec![1, 4, 7, 11, 15],
+            vec![2, 5, 8, 12, 19],
+            vec![3, 6, 9, 16, 22],
+            vec![10, 13, 14, 17, 24],
+            vec![18, 21, 23, 26, 30],
+        ], 5), Some((1, 1)));
+    }
+
+    #[test]
+    fn find_peak_row_test() {
+        assert_eq!(find_peak_grid_row(&vec![
+            vec![47, 30, 35, 8, 25],
+            vec![6, 36, 19, 41, 40],
+            vec![24, 37, 13, 46, 5],
+            vec![3, 43, 15, 50, 19],
+            vec![6, 15, 7, 25, 18],
+        ]), Some((3, 3)));
     }
 }

@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::fmt::{Display, Formatter};
 use std::rc::{Rc, Weak};
 
 struct Node<T> {
@@ -25,7 +26,7 @@ impl<T> Node<T> {
 
 impl<T> From<Node<T>> for Option<Rc<RefCell<Node<T>>>> {
     //This is used to convert a Node to a NodePtr
-    fn from(value: Node<T>) -> Self { Some(Rc::new(RefCell::new(Node::new(value)))) }
+    fn from(node: Node<T>) -> Self { Some(Rc::new(RefCell::new(node))) }
 }
 
 type NodePtr<T> = Rc<RefCell<Node<T>>>; //This is a type-def
@@ -124,5 +125,44 @@ impl<T: Copy> DoublyLinkedList<T> {
                 Ok(head.value)
             }
         }
+    }
+    //Reverse the list
+    pub fn reverse(&mut self) {
+        let mut current_node = self.head.clone();
+
+        while let Some(current) = current_node {
+            let mut current_borrowed = current.borrow_mut();
+            let next = current_borrowed.next.take();
+            let prev = current_borrowed.prev.take();
+
+            if let Some(prev) = prev {
+                current_borrowed.next = Some(prev.upgrade().unwrap());
+            }
+            if let Some(next) = &next {
+                current_borrowed.prev = Some(Rc::downgrade(&next));
+            }
+
+            current_node = next;
+        }
+
+        std::mem::swap(&mut self.head, &mut self.tail);
+    }
+}
+
+impl<T: Copy + Display> Display for DoublyLinkedList<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut current = self.head.clone();
+        let mut result = String::new();
+
+        while let Some(curr) = current {
+            let curr_borrowed = curr.borrow();
+            result.push_str(&format!("{}", curr_borrowed.value));
+            if curr_borrowed.next.is_some() {
+                result.push_str(" ↔️ ");
+            }
+            current = curr_borrowed.next.clone();
+        }
+
+        write!(f, "[{}]", result)
     }
 }
