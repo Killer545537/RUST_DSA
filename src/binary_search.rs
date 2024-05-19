@@ -744,6 +744,30 @@ pub fn find_peak_grid_row(matrix: &Vec<Vec<i32>>) -> Option<(usize, usize)> { //
     None
 }
 
+pub fn median_sorted_matrix(matrix: &Vec<Vec<i32>>) -> i32 { //We are given that the matrix: n ⨉ m, n and m are both odd
+    //Low is the least element in the first column and high is the max element in the last column
+    let (mut low, mut high) = (matrix.iter().map(|row| row[0]).min().unwrap(), matrix.iter().map(|row| row[row.len() - 1]).max().unwrap());
+    let required = (matrix.len() * matrix[0].len()) / 2;
+    let required = required as i32;
+
+    let smaller_eq = |element: i32| -> i32 {
+        matrix.iter().map(|row| upper_bound(row, element).unwrap_or(row.len()   )).sum::<usize>() as i32
+    };
+
+    while low <= high {
+        let mid = (low + high) / 2;
+        let number_of_smaller_eq: i32 = smaller_eq(mid);
+
+        if number_of_smaller_eq <= required {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+
+    low
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -907,5 +931,14 @@ mod tests {
             vec![3, 43, 15, 50, 19],
             vec![6, 15, 7, 25, 18],
         ]), Some((3, 3)));
+    }
+
+    #[test]
+    fn median_matrix_test() {
+        assert_eq!(median_sorted_matrix(&vec![
+            vec![1, 3, 5],
+            vec![2, 6, 9],
+            vec![3, 6, 9],
+        ]), 5)
     }
 }
