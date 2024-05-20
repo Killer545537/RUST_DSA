@@ -1,11 +1,16 @@
 #![allow(dead_code)]
 
-use crate::binary_search::upper_bound;
-use crate::doubly_linked_list::DoublyLinkedList;
 
 mod arrays;
 mod binary_search;
 mod linked_lists;
 mod doubly_linked_list;
+mod recursion;
 
-fn main() {}
+fn is_palindrome(s: &str) -> bool {
+    s.chars().eq(s.clone().chars().rev())
+}
+fn main() {
+    let s = "a";
+    println!("{}", is_palindrome(s));
+}
