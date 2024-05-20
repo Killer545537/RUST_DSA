@@ -1,7 +1,3 @@
-use std::collections::HashSet;
-use std::os::unix::raw::mode_t;
-use crate::is_palindrome;
-
 pub fn my_atoi(s: String) -> i32 {
     let s = s.trim(); //Remove all leading and trailing spaces
     let (s, sign) = match s.strip_prefix('-') { //Get the sign of the integer
