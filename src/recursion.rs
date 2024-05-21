@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 pub fn my_atoi(s: String) -> i32 {
     let s = s.trim(); //Remove all leading and trailing spaces
     let (s, sign) = match s.strip_prefix('-') { //Get the sign of the integer
@@ -237,7 +239,6 @@ pub fn permute(arr: &[i32]) -> Vec<Vec<i32>> {
     ans
 }
 
-
 //Find all partitions which result in the substrings being palindromes
 pub fn partition(s: String) -> Vec<Vec<String>> {
     let mut ans: Vec<Vec<String>> = Vec::new();
@@ -318,6 +319,104 @@ pub fn solve_n_queens(n: usize) -> Vec<Vec<Vec<bool>>> {
     ans
 }
 
+pub fn solve_sudoku(board: &mut Vec<Vec<char>>) {
+    pub fn is_valid(board: &Vec<Vec<char>>, row: usize, col: usize, c: char) -> bool {
+        for i in 0..9 {
+            if board[i][col] == c { //Checking the column
+                return false;
+            }
+            if board[row][i] == c { //Checking the row
+                return false;
+            }
+            if board[3 * (row / 3) + i / 3][3 * (col / 3) + i % 3] == c { //Checking the 3*3 square
+                return false;
+            }
+        }
+
+        true
+    }
+    fn solve(board: &mut Vec<Vec<char>>) -> bool {
+        for i in 0..board.len() {
+            for j in 0..board[0].len() {
+                if board[i][j] == '.' {
+                    for c in ('1'..='9') {
+                        if is_valid(board, i, j, c) {
+                            board[i][j] = c;
+                            if solve(board) {
+                                return true;
+                            } else {
+                                board[i][j] = '.';
+                            }
+                        }
+                    }
+                    return false; //This means that a solution is not reached from the current path
+                }
+            }
+        }
+        true
+    }
+
+    solve(board);
+}
+
+pub fn graph_coloring(adj_matrix: &Vec<Vec<bool>>, colors: i32) -> bool {
+    let mut color = vec![0; adj_matrix.len()];
+    fn is_safe(node: usize, color: &Vec<i32>, adj_matrix: &Vec<Vec<bool>>, crayon: i32) -> bool {
+        for i in 0..adj_matrix.len() {
+            if adj_matrix[node][i] && color[i] == crayon {
+                return false;
+            }
+        }
+        true
+    }
+    fn solve(node: usize, color: &mut Vec<i32>, adj_matrix: &Vec<Vec<bool>>, colors: i32) -> bool {
+        if node == adj_matrix.len() {
+            return true;
+        }
+        for crayon in 1..=colors {
+            if is_safe(node, color, adj_matrix, crayon) {
+                color[node] = crayon;
+                if solve(node + 1, color, adj_matrix, colors) {
+                    return true;
+                }
+                color[node] = 0;
+            }
+        }
+        false
+    }
+    solve(0, &mut color, adj_matrix, colors)
+}
+
+//Given a maze where 0 means the cell cannot be accessed
+//We need to find the path from (0,0) to end of the maze (always a square) where each cell is visited only once
+pub fn rat_in_maze(maze: &Vec<Vec<bool>>) -> Vec<String> {
+    let n = maze.len();
+    const DIRECTIONS: [(char, (i32, i32)); 4] = [('D', (1, 0)), ('L', (0, -1)), ('R', (0, 1)), ('U', (-1, 0))];
+    let mut ans: Vec<String> = Vec::new();
+    let mut path: String = String::new();
+    let mut vis = vec![vec![false; n]; n];
+    fn helper(row: usize, col: usize, maze: &Vec<Vec<bool>>, n: usize, vis: &mut Vec<Vec<bool>>, path: &mut String, ans: &mut Vec<String>) {
+        if row == n - 1 && col == n - 1 { //If the destination has been reached
+            ans.push(path.clone());
+            return;
+        }
+        for (dir, (dx, dy)) in DIRECTIONS.iter() {
+            let new_row = row as i32 + dx;
+            let new_col = col as i32 + dy;
+            if new_row >= 0 && new_row < n as i32 && new_col >= 0 && new_col < n as i32 && maze[new_row as usize][new_col as usize] && !vis[new_row as usize][new_col as usize] {
+                vis[new_row as usize][new_col as usize] = true;
+                path.push(*dir);
+                helper(new_row as usize, new_col as usize, maze, n, vis, path, ans);
+                path.pop();
+                vis[new_row as usize][new_col as usize] = false;
+            }
+        }
+    }
+
+    helper(0, 0, maze, n, &mut vis, &mut path, &mut ans);
+    ans
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -382,5 +481,19 @@ mod tests {
             vec!["a".to_string(), "a".to_string(), "b".to_string()],
             vec!["aa".to_string(), "b".to_string()],
         ]);
+    }
+
+    // fn coloring_test() {
+    //     assert_eq!(graph_coloring(&vec![vec![true; 4]; 4], 2), true);
+    // }
+
+    #[test]
+    fn rat_test() {
+        assert_eq!(rat_in_maze(&vec![
+            vec![true, false, false, false],
+            vec![true, true, false, true],
+            vec![true, true, false, false],
+            vec![false, true, true, true],
+        ]), vec!["DDRDRR".to_string(), "DRDDRR".to_string()])
     }
 }
