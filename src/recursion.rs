@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 pub fn my_atoi(s: String) -> i32 {
     let s = s.trim(); //Remove all leading and trailing spaces
     let (s, sign) = match s.strip_prefix('-') { //Get the sign of the integer
@@ -220,7 +218,7 @@ pub fn combination_sum_returns(k: i32, n: i32) -> Vec<Vec<i32>> {
 pub fn permute(arr: &[i32]) -> Vec<Vec<i32>> {
     //This can also be done using a map storing if the element has occurred in the permutation
     let mut ans: Vec<Vec<i32>> = Vec::with_capacity((1..=arr.len()).product::<usize>());
-    let mut perm = arr.clone().to_vec();
+    let mut perm = arr.to_vec();
     fn helper(index: usize, perm: &mut Vec<i32>, ans: &mut Vec<Vec<i32>>) {
         if index == perm.len() {
             ans.push(perm.clone());
@@ -339,7 +337,7 @@ pub fn solve_sudoku(board: &mut Vec<Vec<char>>) {
         for i in 0..board.len() {
             for j in 0..board[0].len() {
                 if board[i][j] == '.' {
-                    for c in ('1'..='9') {
+                    for c in '1'..='9' {
                         if is_valid(board, i, j, c) {
                             board[i][j] = c;
                             if solve(board) {
@@ -414,6 +412,28 @@ pub fn rat_in_maze(maze: &Vec<Vec<bool>>) -> Vec<String> {
     }
 
     helper(0, 0, maze, n, &mut vis, &mut path, &mut ans);
+    ans
+}
+
+//Take a set 1..=n, and find the kth permutation of it
+pub fn get_permutation(n: i32, k: i32) -> String {
+    let mut fact: i32 = (1..n).product(); // (n-1)! which is the number of permutations which start with 'x'
+    let mut arr: Vec<i32> = (1..=n).collect();
+    let mut k = k - 1; //Convert into 0-based indexing
+    let mut ans = String::new();
+
+    loop {
+        ans += arr[(k / fact) as usize].to_string().as_str();
+        arr.remove((k / fact) as usize);
+
+        if arr.len() == 0 {
+            break;
+        }
+
+        k %= fact; //Now we find how many 'more' permutations we need
+        fact /= arr.len() as i32; //Also reducing the number of permutations since the number of elements is 1 less
+    }
+
     ans
 }
 
@@ -495,5 +515,12 @@ mod tests {
             vec![true, true, false, false],
             vec![false, true, true, true],
         ]), vec!["DDRDRR".to_string(), "DRDDRR".to_string()])
+    }
+
+    #[test]
+    fn kth_permutation_test() {
+        assert_eq!(get_permutation(3,3), "213".to_string());
+        assert_eq!(get_permutation(4,9), "2314".to_string());
+        assert_eq!(get_permutation(3,1), "123".to_string());
     }
 }
