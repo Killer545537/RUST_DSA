@@ -1,7 +1,5 @@
 //A greedy approach is one which makes the best choice available at the current moment (no consideration of future events)
 
-use itertools::rev;
-
 //Here, greed is the greed factor of each child and cookies is the greed factor that it can satisfy
 //For a child to be content cookie >= greed
 pub fn find_content_children(greed: &[i32], cookies: &[i32]) -> i32 {
@@ -75,7 +73,7 @@ pub fn jump(arr: Vec<i32>) -> i32 {
     let (mut jumps, mut l, mut r) = (0, 0, 0); //l -> r forms a range which can be reached in a jump
 
     while r < arr.len() - 1 {
-        let mut farthest = (l..=r).map(|i| i + arr[i] as usize).max().unwrap();
+        let farthest = (l..=r).map(|i| i + arr[i] as usize).max().unwrap();
 
         l = r + 1;
         r = farthest;

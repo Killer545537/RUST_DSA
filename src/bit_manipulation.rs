@@ -29,7 +29,7 @@ pub fn check_kth_bit(num: i32, k: usize) -> bool {
         false
     } else {
         true
-    }
+    };
 }
 
 ///Set the kth bit from the right end if not set
@@ -51,6 +51,68 @@ pub fn toggle_kth_bit(num: &mut i32, k: usize) {
     let mask = 1 << k;
 
     *num = *num ^ mask;
+}
+
+///Unset the rightmost set bit
+pub fn remove_last_set_bit(num: &mut i32) {
+    *num = *num & (*num - 1);
+}
+
+pub fn is_power_of_2(num: i32) -> bool {
+    //If the number, on removing the rightmost set bit is 0
+    return if num & (num - 1) == 0 {
+        true
+    } else {
+        false
+    };
+}
+
+pub fn count_set_bits(mut num: i32) -> i32 {
+    let mut count = 0;
+
+    while num > 1 {
+        count += num & 1; //Odd check
+        num >>= 1;
+    }
+    if num == 1 {
+        count += 1;
+    }
+
+    count
+    //OR we can turn off the rightmost set bit till num != 0
+}
+
+pub fn count_set_bits_better(mut num: i32) -> i32 { //num.count_ones does the same thing
+    let mut count = 0;
+
+    while num != 0 {
+        num &= num - 1;
+        count += 1;
+    }
+
+    count
+}
+
+pub fn min_bit_flips(start: i32, goal: i32) -> i32 {
+    //start ^ goal will have the same number of set bits as the number of bit flips required
+    count_set_bits_better(start ^ goal)
+}
+
+pub fn subsets(arr: &[i32]) -> Vec<Vec<i32>> {
+    let mut ans: Vec<Vec<i32>> = Vec::with_capacity(2usize.pow(arr.len() as u32));
+    let subsets  = 1 << arr.len();
+
+    for builder in 0.. subsets {
+       let mut set = Vec::new();
+        for i in 0.. arr.len() {
+            if builder & (1 << i) != 0 { //We need != 0 since == 1 won't work (no truthy values in Rust)
+                set.push(arr[i]);
+            }
+        }
+        ans.push(set);
+    }
+
+    ans
 }
 
 #[cfg(test)]
@@ -97,5 +159,56 @@ mod tests {
         assert_eq!(x, 0b1001);
         toggle_kth_bit(&mut x, 2);
         assert_eq!(x, 0b1101);
+    }
+
+    #[test]
+    fn remove_last_set_bit_test() {
+        let mut x = 0b1010100;
+        remove_last_set_bit(&mut x);
+        assert_eq!(x, 0b1010000);
+
+        let mut x = 0b100;
+        remove_last_set_bit(&mut x);
+        assert_eq!(x, 0);
+    }
+
+    #[test]
+    fn power_2_test() {
+        assert_eq!(is_power_of_2(16), true);
+        assert_eq!(is_power_of_2(1), true);
+    }
+
+    #[test]
+    fn number_of_set_bits_test() {
+        assert_eq!(count_set_bits(4), 1);
+        assert_eq!(count_set_bits(0b1011), 3);
+        assert_eq!(count_set_bits(0), 0);
+    }
+
+    #[test]
+    fn number_of_set_bits_test_better() {
+        assert_eq!(count_set_bits_better(4), 1);
+        assert_eq!(count_set_bits_better(0b1011), 3);
+        assert_eq!(count_set_bits_better(0), 0);
+    }
+
+    #[test]
+    fn min_flips_test() {
+        assert_eq!(min_bit_flips(10, 7), 3);
+        assert_eq!(min_bit_flips(3, 4), 3);
+    }
+
+    #[test]
+    fn subset_test() {
+        assert_eq!(subsets(&[1,2,3]), vec![
+            vec![],
+            vec![1],
+            vec![2],
+            vec![1, 2],
+            vec![3],
+            vec![1, 3],
+            vec![2, 3],
+            vec![1, 2, 3],
+        ]);
     }
 }

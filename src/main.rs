@@ -11,6 +11,6 @@ mod greedy;
 
 fn main() {
     let x: usize = 2;
-    let y = 1 << x;
-    println!("{y}")
+    let y = x.count_ones();
+
 }
