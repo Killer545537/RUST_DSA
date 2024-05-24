@@ -163,7 +163,7 @@ pub fn subset_sum(arr: &[i32]) -> Vec<i32> {
 }
 
 pub fn subsets_with_dup(arr: &[i32]) -> Vec<Vec<i32>> {
-    let mut arr = arr.clone().to_vec();
+    let mut arr = arr.to_vec();
     arr.sort();
     let mut ans: Vec<Vec<i32>> = Vec::with_capacity(2usize.pow(arr.len() as u32));
     let mut possible: Vec<i32> = Vec::with_capacity(arr.len());

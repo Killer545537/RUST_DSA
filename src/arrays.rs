@@ -29,18 +29,18 @@ pub fn second_largest(arr: &[i32]) -> Option<i32> {
     second
 }
 
-pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
-    let mut map: HashMap<i32, i32> = HashMap::new(); //Element, index
+pub fn two_sum(nums: Vec<i32>, target: i32) -> Option<(usize, usize)> {
+    let mut map: HashMap<i32, usize> = HashMap::new(); //Element, index
 
     for (ind, &ele) in nums.iter().enumerate() {
         let more = target - ele;
         if let Some(&index) = map.get(&more) {
-            return vec![index, ind as i32];
+            return Some((index, ind));
         }
-        map.insert(ele, ind as i32);
+        map.insert(ele, ind);
     }
 
-    return vec![-1, -1];
+    None
 }
 
 pub fn check(nums: Vec<i32>) -> bool {
@@ -555,8 +555,8 @@ mod tests {
 
     #[test]
     fn two_sum_test() {
-        assert_eq!(two_sum(vec![2, 7, 11, 15], 9), vec![0, 1]);
-        assert_eq!(two_sum(vec![3, 2, 4], 6), vec![1, 2]);
+        assert_eq!(two_sum(vec![2, 7, 11, 15], 9), Some((0, 1)));
+        assert_eq!(two_sum(vec![3, 2, 4], 6), Some((1, 2)));
     }
 
     #[test]
