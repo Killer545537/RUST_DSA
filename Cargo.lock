@@ -6,6 +6,7 @@ version = 3
 name = "Data_Structures_Algorithms"
 version = "0.1.0"
 dependencies = [
+ "ethnum",
  "itertools",
  "log",
 ]
@@ -15,6 +16,12 @@ name = "either"
 version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a47c1c47d2f5964e29c61246e81db715514cd532db6b5116a25ea3c03d6780a2"
+
+[[package]]
+name = "ethnum"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b90ca2580b73ab6a1f724b76ca11ab632df820fd6040c336200d2c1df7b3c82c"
 
 [[package]]
 name = "itertools"

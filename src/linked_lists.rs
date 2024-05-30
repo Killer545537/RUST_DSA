@@ -1,6 +1,6 @@
-/*  A linked list is a collection of data elements (node) where the linear order is given by pointers. It has a dynamic size.
+/*  A linked list is a collection of data elements (node) where the linear order is given by pointers. It has a dynamic size. The memory locations are not contiguous.
 It has T.C. = O(1) for insertion/deletion at beginning, O(n) for insertion/deletion at the end, insertion at a position and searching
-It can be used to implement stacks, queues, etc.
+It can be used to implement stacks, queues, etc. It is used in browser history, sparse data structures (where most of the data is 0/empty), playlists, etc.
 Rust has a built-in linked-list data-type LinkedList in the std::collections module (This is actually a doubly linked list)*/
 
 use std::fmt::{Display, Formatter};
@@ -29,7 +29,7 @@ impl<T: Copy> LinkedList<T> {
     pub fn new() -> Self {
         LinkedList { head: None }
     }
-    ///Add an element to the front
+    ///Add an element to the front. T.C. = O(1)
     pub fn push_front(&mut self, value: T) {
         let mut node = Box::new(Node::new(value));
 
@@ -41,7 +41,7 @@ impl<T: Copy> LinkedList<T> {
             }
         }
     }
-    ///Add an element to the end of the list
+    ///Add an element to the end of the list. T.C. = O(n)
     pub fn push_back(&mut self, value: T) {
         let node = Box::new(Node::new(value));
         let mut current = &mut self.head;
@@ -92,6 +92,23 @@ impl<T: Copy> LinkedList<T> {
         }
     }
 }
+
+impl<T: Copy + PartialEq> LinkedList<T> {
+    ///Finding an element in the list. T.C. = O(n)
+    pub fn search(&self, value: T) -> bool {
+        let mut current = &self.head;
+
+        while let Some(node) = current {
+            if node.value == value {
+                return true;
+            }
+            current = &node.next;
+        }
+
+        false //value not in the list
+    }
+}
+
 //Println
 impl<T: Display> Display for LinkedList<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -108,4 +125,45 @@ impl<T: Display> Display for LinkedList<T> {
         result.push_str(" ➡️ NULL");
         write!(f, "[{}]", result)
     }
+}
+
+//The following implementation is for LeetCode Questions
+#[derive(PartialEq, Eq, Clone, Debug)]
+struct ListNode {
+    val: i32,
+    next: Option<Box<ListNode>>,
+}
+
+impl ListNode {
+    fn new(val: i32) -> Self {
+        ListNode {
+            val,
+            next: None,
+        }
+    }
+}
+
+///Given two numbers in a linked list in reverse order (123 => 3->2->1->None)
+pub fn add_two_numbers(l1: Option<Box<ListNode>>, l2: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+    fn helper(l1: Option<Box<ListNode>>, l2: Option<Box<ListNode>>, carry: i32) -> Option<Box<ListNode>> {
+        if l1.is_none() && l2.is_none() && carry == 0 {
+            return None;
+        }
+
+        let l1 = l1.unwrap_or(Box::new(ListNode::new(0)));
+        let l2 = l2.unwrap_or(Box::new(ListNode::new(0)));
+
+        let sum = l1.val + l2.val + carry;
+        let mut node = ListNode::new(sum % 10);
+        node.next = helper(l1.next, l2.next, sum / 10);
+
+        Some(Box::new(node))
+    }
+
+    helper(l1, l2, 0)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
 }
