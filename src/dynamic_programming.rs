@@ -192,9 +192,146 @@ pub fn maximum_points(points: Vec<Vec<i32>>) -> i32 {
 
     helper(&points, 0, 0, &mut dp)
 }
-
 //We can convert the 2-D DP into a 1-D DP since only the scores of the previous day matter
 //TODO- Convert into 1-D
+
+///The total number of unique paths from (0,0) to (m-1, n-1) moving down or right
+pub fn unique_paths_recursive(m: i32, n: i32) -> i32 {
+    if m == 1 || n == 1 {
+        return 1;
+    }
+
+    return unique_paths_recursive(m - 1, n) + unique_paths_recursive(m, n - 1);
+}
+
+pub fn unique_paths_dp(m: i32, n: i32) -> i32 {
+    let m = m as usize;
+    let n = n as usize;
+    let mut dp = vec![vec![1; n]; m];
+    for i in 1..m {
+        for j in 1..n {
+            dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+        }
+    }
+
+
+    dp[m - 1][n - 1]
+}
+
+pub fn unique_paths(m: i32, n: i32) -> i32 {
+    let m = m as usize;
+    let n = n as usize;
+    let mut prev = vec![1; n];
+    for _ in 1..m {
+        let mut curr = vec![1; n];
+        for i in 1..n {
+            curr[i] = curr[i - 1] + prev[i];
+        }
+        prev = curr;
+    }
+
+    prev[n - 1]
+}
+
+///1-> obstacle
+pub fn unique_path_with_obstacles(obstacle_grid: Vec<Vec<i32>>) -> i32 {
+    let m = obstacle_grid.len();
+    let n = obstacle_grid[0].len();
+    if obstacle_grid[0][0] == 1 || obstacle_grid[m - 1][n - 1] == 1 {
+        return 0;
+    }
+    let mut dp = vec![vec![0; n]; m];
+    dp[0][0] = 1;
+    for i in 1..m {
+        if obstacle_grid[i][0] == 0 {
+            dp[i][0] = dp[i - 1][0];
+        }
+    }
+    for j in 1..n {
+        if obstacle_grid[0][j] == 0 {
+            dp[0][j] = dp[0][j - 1];
+        }
+    }
+
+    for i in 1..m {
+        for j in 1..n {
+            if obstacle_grid[i][j] == 0 {
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+            }
+        }
+    }
+
+    dp[m - 1][n - 1]
+}
+
+pub fn unique_path_with_obstacles_optimised(obstacle_grid: Vec<Vec<i32>>) -> i32 {
+    let m = obstacle_grid.len();
+    let n = obstacle_grid[0].len();
+    if obstacle_grid[0][0] == 1 || obstacle_grid[m - 1][n - 1] == 1 {
+        return 0;
+    }
+    let mut prev = vec![0; n];
+    prev[0] = 1;
+    for i in 0..m {
+        let mut curr = vec![0; n];
+        for j in 0..n {
+            if obstacle_grid[i][j] == 1 {
+                curr[j] = 0;
+            } else if j > 0 {
+                curr[j] = curr[j - 1] + prev[j];
+            } else {
+                curr[j] = prev[j];
+            }
+        }
+        prev = curr;
+    }
+
+    prev[n - 1]
+}
+
+///Only move down/right
+pub fn min_path_sum_recursive(grid: Vec<Vec<i32>>) -> i32 {
+    let m = grid.len();
+    let n = grid[0].len();
+    fn helper(grid: &Vec<Vec<i32>>, m: usize, n: usize) -> i32 {
+        if m == 0 && n == 0 {
+            return grid[m][n];
+        }
+        if m == 0 {
+            return grid[m][n] + helper(grid, m, n - 1);
+        }
+        if n == 0 {
+            return grid[m][n] + helper(grid, m - 1, n);
+        }
+        return grid[m][n] + std::cmp::min(helper(grid, m - 1, n), helper(grid, m, n - 1));
+    }
+
+    helper(&grid, m - 1, n - 1)
+}
+
+pub fn min_path_sum(grid: Vec<Vec<i32>>) -> i32 {
+    let m = grid.len();
+    let n = grid[0].len();
+    let mut dp = vec![vec![-1; n]; m];
+    dp[0][0] = grid[0][0];
+
+    //First row
+    for j in 1..n {
+        dp[0][j] = dp[0][j - 1] + grid[0][j];
+    }
+    //First column
+    for i in 1..m {
+        dp[i][0] = dp[i - 1][0] + grid[i][0];
+    }
+
+    for i in 1..m {
+        for j in 1..n {
+            dp[i][j] = std::cmp::min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
+        }
+    }
+
+    dp[m - 1][n - 1]
+}
 
 #[cfg(test)]
 mod tests {
@@ -241,5 +378,60 @@ mod tests {
             vec![3, 1, 1],
             vec![3, 3, 3],
         ]), 11);
+    }
+
+    #[test]
+    fn unique_paths_test() {
+        assert_eq!(unique_paths_recursive(3, 7), 28);
+        assert_eq!(unique_paths_recursive(3, 2), 3);
+        assert_eq!(unique_paths_dp(3, 7), 28);
+        assert_eq!(unique_paths_dp(3, 2), 3);
+        assert_eq!(unique_paths(3, 7), 28);
+        assert_eq!(unique_paths(3, 2), 3);
+    }
+
+    #[test]
+    fn unique_paths_with_obstaces_test() {
+        assert_eq!(unique_path_with_obstacles(vec![
+            vec![0, 0, 0],
+            vec![0, 1, 0],
+            vec![0, 0, 0],
+        ]), 2);
+        assert_eq!(unique_path_with_obstacles(vec![
+            vec![0, 1],
+            vec![0, 0],
+        ]), 1);
+        assert_eq!(unique_path_with_obstacles_optimised(vec![
+            vec![0, 0, 0],
+            vec![0, 1, 0],
+            vec![0, 0, 0],
+        ]), 2);
+        assert_eq!(unique_path_with_obstacles_optimised(vec![
+            vec![0, 1],
+            vec![0, 0],
+        ]), 1);
+        assert_eq!(unique_path_with_obstacles_optimised(vec![vec![0, 0]]), 1);
+    }
+
+    #[test]
+    fn min_path_sum_test() {
+        assert_eq!(min_path_sum_recursive(vec![
+            vec![1, 3, 1],
+            vec![1, 5, 1],
+            vec![4, 2, 1],
+        ]), 7);
+        assert_eq!(min_path_sum_recursive(vec![
+            vec![1, 2, 3],
+            vec![4, 5, 6],
+        ]), 12);
+        assert_eq!(min_path_sum(vec![
+            vec![1, 3, 1],
+            vec![1, 5, 1],
+            vec![4, 2, 1],
+        ]), 7);
+        assert_eq!(min_path_sum(vec![
+            vec![1, 2, 3],
+            vec![4, 5, 6],
+        ]), 12);
     }
 }
