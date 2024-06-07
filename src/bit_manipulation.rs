@@ -208,7 +208,15 @@ pub fn divide(dividend: i32, divisor: i32) -> i32 {
         quotient
     } else {
         -quotient
+    };
+}
+
+pub fn addition(a: i32, b: i32) -> i32 {
+    if b == 0 {
+        return a;
     }
+
+    addition(a ^ b, (a & b) << 1)
 }
 
 #[cfg(test)]
@@ -324,5 +332,11 @@ mod tests {
     fn single_still_test() {
         assert!(single_number_3(&[1, 2, 1, 3, 2, 5]) == (3, 5) || single_number_3(&[1, 2, 1, 3, 2, 5]) == (5, 3));
         assert!(single_number_3(&[-1, 0]) == (-1, 0) || single_number_3(&[-1, 0]) == (0, -1));
+    }
+
+    #[test]
+    fn add_test() {
+        assert_eq!(addition(4, 3), 7);
+        assert_eq!(addition(0, 0), 0);
     }
 }

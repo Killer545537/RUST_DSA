@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::cmp::{Ordering};
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use std::rc::Rc;
 
 /* A tree is a non-linear data structure which shows hierarchical relation between elements. It is a DAG. Each edge defines a parent-child relationship between the nodes. There a unique path from the root to each node.
@@ -430,12 +430,33 @@ pub fn children_sum_property(node: Option<Rc<RefCell<Node>>>) {
             total += right.borrow().value;
         }
 
-        dbg!(total);
-
         if node.borrow().left.is_some() || node.borrow().right.is_some() {
             node.borrow_mut().value = total;
         }
     }
+}
+
+///Find the nodes at a distance of k from target
+pub fn distance_k(root: Option<Rc<RefCell<Node>>>, target: Option<Rc<RefCell<Node>>>, k: i32) -> Vec<i32> {
+    todo!()
+}
+
+pub fn count_nodes(root: Option<Rc<RefCell<Node>>>) -> i32 {
+    let mut ans = 0;
+    let mut stack = vec![root];
+
+    while let Some(Some(node)) = stack.pop() {
+        ans += 1;
+        let node = node.borrow();
+        if node.left.is_some() {
+            stack.push(node.left.clone());
+        }
+        if node.right.is_some() {
+            stack.push(node.right.clone());
+        }
+    }
+
+    ans
 }
 
 

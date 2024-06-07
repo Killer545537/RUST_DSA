@@ -2,6 +2,7 @@
 
 
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 use binary_tress::*;
@@ -16,13 +17,14 @@ mod greedy;
 mod math;
 mod dynamic_programming;
 mod binary_tress;
+mod two_pointer;
 
 fn main() {
-    let mut root = Node::new(10);
-    root.add_left(5);
-    root.add_right(3);
+    let mut map = HashMap::new();
+    map.insert(4,3);
+    map.insert(10,3);
 
-    println!("{root:?}");
-    children_sum_property(Some(Rc::new(RefCell::new(root.clone()))));
-    println!("{root:?}")
+    let x = map[&4];
+
+    println!("{x}");
 }
