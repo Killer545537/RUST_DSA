@@ -138,7 +138,7 @@ pub fn number_of_substrings(s: String) -> usize {
         }
 
         if last_seen.0.is_some() && last_seen.1.is_some() && last_seen.2.is_some() {
-            count += (1 + std::cmp::min(std::cmp::min(last_seen.0, last_seen.1), last_seen.2).unwrap());
+            count += 1 + std::cmp::min(std::cmp::min(last_seen.0, last_seen.1), last_seen.2).unwrap();
         }
     }
 

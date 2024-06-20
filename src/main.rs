@@ -1,8 +1,7 @@
 #![allow(dead_code)]
 
-
-use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashSet};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 mod arrays;
 mod bit_manipulation;
@@ -17,9 +16,6 @@ mod binary_tress;
 mod two_pointer;
 mod graphs;
 
-fn main() {
-    let mut set = HashSet::new();
-    set.insert(10);
-    set.insert(3);
 
-}
+
+fn main() {}

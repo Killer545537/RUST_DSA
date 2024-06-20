@@ -13,10 +13,10 @@ Adjacency List :- In this the ith index stores the vertices connected to i Uses 
 The drawbacks of the above are when we use Sparse Matrices (where 0s are more), it wastes a lot of memory, thus, we use Linked Lists to save memory
  */
 
-use std::cmp::Reverse;
+use std::cmp::{Ordering, Reverse};
 use std::collections::{HashSet, VecDeque, HashMap, BinaryHeap};
-use std::hash::{Hash, Hasher};
-use std::iter::Rev;
+use std::ops::Index;
+use itertools::Itertools;
 
 //TRAVERSAL TECHNIQUES (A graph can either start from 0 or 1, I will start my graphs from 1 unless the question states otherwise)
 // Breadth-First-Search (BFS) uses a queue (can use recursion but basically the same algorithm, thus not worth it). T.C. = O(V+E) & S.C. = O(V)
@@ -281,7 +281,7 @@ pub fn update_matrix(mat: Vec<Vec<i32>>) -> Vec<Vec<i32>> { //This is a multi-so
     distance
 }
 
-///Replace any region (of Os) surrounded by Xs on all 4 sides with X
+///Replace any region (of Os) surrounded by Xs on all four sides with X
 pub fn surround_regions(board: &mut Vec<Vec<char>>) {
     //Regions on the boundaries cannot be changed (since they are not 'surrounded')
     //Thus, all Os connected to a boundary O will not be changed and all other will be converted to X
@@ -323,7 +323,7 @@ pub fn surround_regions(board: &mut Vec<Vec<char>>) {
 
 ///We need to find the number of land regions (1) from where we cannot walk out of the boundary
 pub fn num_enclaves(grid: Vec<Vec<i32>>) -> usize {
-    //Any 1 that is connected to the boundary will not be counted in out answer
+    //Any 1 connected to the boundary will not be counted in out answer
     let mut vis = vec![vec![false; grid[0].len()]; grid.len()];
     let mut queue = VecDeque::new(); //Using BFS
 
@@ -360,38 +360,7 @@ pub fn num_enclaves(grid: Vec<Vec<i32>>) -> usize {
         .count()
 }
 
-//TODO- Somehow, this does not work
-// pub fn number_of_distinct_islands(grid: Vec<Vec<i32>>) -> usize {
-//     let mut vis = vec![vec![false; grid[0].len()]; grid.len()];
-//     let mut islands = HashSet::new();
-//     fn helper(row: i32, col: i32, base_row: i32, base_col: i32, grid: &Vec<Vec<i32>>, vis: &mut Vec<Vec<bool>>, shape: &mut Vec<(i32, i32)>) {
-//         vis[row as usize][col as usize] = true;
-//         shape.push((row - base_row, col - base_col));
-//         const DIRECTIONS: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
-//
-//         for direction in DIRECTIONS {
-//             let new_row = row + direction.0;
-//             let new_col = col + direction.1;
-//             if new_row >= 0 && new_row < grid.len() as i32 && new_col >= 0 && new_col < grid[0].len() as i32
-//                 && !vis[new_row as usize][new_col as usize] && grid[new_row as usize][new_col as usize] == 1 {
-//                 helper(new_row, new_col, base_row, base_col, grid, vis, shape);
-//             }
-//         }
-//     }
-//
-//     for row in 0..grid.len() {
-//         for col in 0..grid[0].len() {
-//             if !vis[row][col] && grid[row][col] == 1 {
-//                 let mut shape = Vec::new();
-//                 helper(row as i32, col as i32, row as i32, col as i32, &grid, &mut vis, &mut shape);
-//                 shape.sort(); // Sort the shape vector
-//                 islands.insert(shape);
-//             }
-//         }
-//     }
-//
-//     islands.len()
-// }
+//TODO- Find a way to implement "Number of Distinct Islands in Rust
 
 //A bipartite graph is one which can be colored with 2 colors such that no adjacent nodes are the same color
 //Precisely, if the vertex V can be partitioned into sets X and Y such that all edges have one end in X and the other in Y
@@ -798,7 +767,7 @@ pub fn ladder_length(begin_word: String, end_word: String, word_list: Vec<String
     0
 }
 
-//TODO- Time Limit Exceeded
+//This will result in TLE
 pub fn find_ladder(begin_word: String, end_word: String, word_list: Vec<String>) -> Vec<Vec<String>> {
     let mut set: HashSet<String> = word_list.clone().into_iter().collect();
     let mut queue = VecDeque::new();
@@ -905,7 +874,7 @@ pub fn find_ladder_optimised(begin_word: String, end_word: String, word_list: Ve
     ans
 }
 
-///A min-heap has the minimum element as the root. T.C. = O(E log V)
+///A min-heap has the minimum element as the root. T.C. = O(E log V). This works on positive weighted acyclic graphs
 pub fn dijkstra_algorithm_min_heap(adj_list: Vec<Vec<(usize, i32)>>, source: usize) -> Vec<Option<i32>> {
     //In Rust a Binary Heap is by-default a max-heap. Reverse(T) is used to reverse the ordering
     let mut heap: BinaryHeap<Reverse<(i32, usize)>> = BinaryHeap::new(); //Min-Heap/Priority Queue in C++
@@ -981,7 +950,7 @@ pub fn shortest_path(adj_list: Vec<Vec<(usize, i32)>>) -> Option<Vec<usize>> { /
     Some(path)
 }
 
-///Find the length of the shortest path from (0, 0) to (n-1, n-1) travelling only on 0s (8-directional movement)
+///Find the length of the shortest path from (0, 0) to (n-1, n-1), traveling only on 0s (8-directional movement)
 pub fn shortest_path_binary_matrix(grid: Vec<Vec<i32>>) -> i32 {
     let n = grid.len();
     if grid[0][0] == 1 || grid[n - 1][n - 1] == 1 {
@@ -1049,6 +1018,764 @@ pub fn minimum_effort_path(heights: Vec<Vec<i32>>) -> i32 {
         }
     }
     unreachable!()
+}
+
+pub fn find_cheapest_price(cities: i32, flights: Vec<Vec<(usize, i32)>>, src: usize, dst: usize, max_stops: i32) -> Option<i32> {
+    let mut distances = vec![i32::MAX; cities as usize];
+    distances[src] = 0;
+    let mut queue = VecDeque::new(); //Stops, Node, Cost
+    queue.push_back((0, (src, 0)));
+
+    while let Some((stops, (node, cost))) = queue.pop_front() {
+        if stops > max_stops {
+            continue;
+        }
+
+        for &(adj_node, edge_cost) in &flights[node] {
+            if cost + edge_cost < distances[adj_node] && stops <= max_stops {
+                distances[adj_node] = cost + edge_cost;
+                queue.push_back((stops + 1, (adj_node, cost + edge_cost)));
+            }
+        }
+    }
+
+    return if distances[dst] == i32::MAX {
+        None
+    } else {
+        Some(distances[dst])
+    };
+}
+
+pub fn network_delay_time(data: Vec<Vec<i32>>, nodes: i32, source: i32) -> i32 {
+    let nodes = nodes as usize + 1;
+    let source = source as usize;
+    let mut graph = vec![Vec::new(); nodes];
+    for item in data {
+        graph[item[0] as usize].push((item[1] as usize, item[2]));
+    }
+    let mut times = vec![None; nodes];
+    times[source] = Some(0);
+    let mut heap = BinaryHeap::new();
+    heap.push(Reverse((0, source)));
+
+    while let Some(Reverse((time, node))) = heap.pop() {
+        for &(adj_node, more_time) in &graph[node] {
+            times[adj_node] = match times[adj_node] {
+                None => {
+                    heap.push(Reverse((time + more_time, adj_node)));
+                    Some(time + more_time)
+                }
+                Some(current_time) => {
+                    if time + more_time < current_time {
+                        heap.push(Reverse((time + more_time, adj_node)));
+                        Some(time + more_time)
+                    } else {
+                        Some(current_time)
+                    }
+                }
+            };
+        }
+    }
+
+    times.into_iter().skip(1).try_fold(i32::MIN, |max_val, val| match val {
+        None => None,
+        Some(num) => Some(max_val.max(num))
+    }).unwrap_or(-1)
+}
+
+///Multiply start with any number in nums (mod 1e5 if necessary) and find the number of steps to reach the end
+pub fn minimum_multiplications_to_reach_end(nums: Vec<i32>, start: i32, end: i32) -> i32 {
+    const MOD: i32 = 1e5 as i32;
+    let mut multiplications = vec![i32::MAX; MOD as usize]; //Theses are all the numbers from 0..9999
+    multiplications[start as usize] = 0;
+    //Here a heap is not necessary since the nodes will be traversed in order
+    let mut queue = VecDeque::new(); //Steps, number
+    queue.push_back((0, start));
+
+    while let Some((step, number)) = queue.pop_front() {
+        for &mul in &nums {
+            let new_num = (number * mul) % MOD;
+            if step + 1 < multiplications[new_num as usize] {
+                multiplications[new_num as usize] = step + 1;
+                if new_num == end {
+                    return step + 1;
+                }
+                queue.push_back((step + 1, new_num));
+            }
+        }
+    }
+
+    -1
+}
+
+//The number of ways to go from 1->n in the shortest time possible
+pub fn count_paths(adj_list: Vec<Vec<(usize, i32)>>) -> i32 {
+    let mut heap = BinaryHeap::new();
+    heap.push(Reverse((0, 0))); //Time, Node
+    let mut times = vec![None; adj_list.len()];
+    times[0] = Some(0);
+    let mut ways = vec![0; adj_list.len()]; //Number of ways node is reached in the shortest time
+    ways[0] = 1;
+
+    while let Some(Reverse((time, node))) = heap.pop() {
+        for &(adj_node, wait) in &adj_list[node] {
+            times[adj_node] = match times[adj_node] {
+                None => {
+                    heap.push(Reverse((wait + time, adj_node)));
+                    ways[adj_node] = ways[node];
+                    Some(wait + time)
+                }
+                Some(current_time) => {
+                    match current_time.cmp(&(wait + time)) {
+                        Ordering::Less => {
+                            Some(current_time)
+                        }
+                        Ordering::Equal => {
+                            ways[adj_node] += ways[node];
+                            Some(current_time)
+                        }
+                        Ordering::Greater => {
+                            heap.push(Reverse((wait + time, adj_node)));
+                            ways[adj_node] = ways[node];
+                            Some(wait + time)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    ways[adj_list.len() - 1]
+}
+
+///This algorithm also find the shortest path. This can handle negative weights, but it only works for directed graph. T.C. = O(VE)
+pub fn bellman_ford_algorithm(adj_list: Vec<Vec<(usize, i32)>>) -> Result<Vec<Option<i32>>, &'static str> {
+    //Here, we 'relax' the edges (update the distance) V-1 for each vertex
+    let mut distances = vec![None; adj_list.len()];
+    distances[0] = Some(0);
+
+    for _ in 0..adj_list.len() - 1 { //N-1 relaxations
+        for node in 0..adj_list.len() {
+            if let Some(dist) = distances[node] {
+                for &(adj_node, weight) in &adj_list[node] {
+                    if let Some(adj_dist) = distances[adj_node] {
+                        if dist + weight < adj_dist {
+                            distances[adj_node] = Some(dist + weight); //Relaxation
+                        }
+                    } else {
+                        distances[adj_node] = Some(dist + weight);
+                    }
+                }
+            }
+        }
+    }
+    //One final relaxation. If the distances can still be decreased, this means there is a negative weight cycle
+    for node in 0..adj_list.len() {
+        if let Some(dist) = distances[node] {
+            for &(adj_node, weight) in &adj_list[node] {
+                if let Some(adj_dist) = distances[adj_node] {
+                    if dist + weight < adj_dist {
+                        return Err("The graph contains a negative cycle");
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(distances)
+}
+
+///This is a multi-source shortest distance algorithm. It can find the distance between every possible pair. T.C. = O(V^3). It is better for dense graphs. A negative cycle is present if distance[i][i] != 0
+pub fn floyd_warshall_algorithm(adj_matrix: Vec<Vec<Option<i32>>>) -> Vec<Vec<Option<i32>>> {
+    let v = adj_matrix.len();
+    let mut distances = adj_matrix.clone();
+    for i in 0..v {
+        for j in 0..v {
+            if i == j {
+                distances[i][j] = Some(0); //Distance to self = 0
+            }
+        }
+    }
+
+    for k in 0..v {
+        for i in 0..v {
+            for j in 0..v {
+                distances[i][j] = Some(std::cmp::min(
+                    distances[i][j].unwrap_or(i32::MAX), distances[i][k].unwrap_or(i32::MAX) + distances[k][j].unwrap_or(i32::MAX),
+                ));
+            }
+        }
+    }
+
+    distances
+}
+
+///This is a multi-source shortest path algorithm. It can find the distance between every possible pair. T.C. = O(V^2logV + VE). It is a combination of Dijkstra's and Bellman-Ford Algorithm
+///Unlike Floyd-Warshall, it can handle negative weights
+pub fn johnson_algorithm(adj_matrix: Vec<Vec<Option<i32>>>) -> Vec<Vec<Option<i32>>> { //This simply converts all edge weights to positive
+    //Adding an extra vertex to perform Bellman-Ford. This new node is at a distance 0 from every other node
+    let mut added_graph = adj_matrix.clone();
+    for row in added_graph.iter_mut() {
+        row.push(None);
+    }
+    added_graph.push(vec![Some(0); added_graph[0].len()]);
+    //Apply Bellman-Ford to find the distances from the added vertex
+    fn bellman_ford(adj_matrix: Vec<Vec<Option<i32>>>) -> Vec<Option<i32>> {
+        let mut distances = vec![None; adj_matrix.len()];
+        distances[adj_matrix.len() - 1] = Some(0);
+
+        for _ in 0..adj_matrix.len() - 1 {
+            for u in 0..adj_matrix.len() {
+                for v in 0..adj_matrix.len() {
+                    if let Some(distance_u) = distances[u] {
+                        if let Some(edge_weight) = adj_matrix[u][v] {
+                            distances[v] = match distances[v] {
+                                None => Some(distance_u + edge_weight),
+                                Some(distance_v) => {
+                                    if distance_u + edge_weight < distance_v {
+                                        Some(distance_u + edge_weight)
+                                    } else {
+                                        Some(distance_v)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        distances
+    }
+
+    let mut distances = bellman_ford(added_graph.clone());
+    distances.pop(); //Remove the added node
+
+    //Change the edge weights of the graph such that all of them are positive
+    //d[v] = d[u] + w(u, v) => w'(u,v) = d[u] - d[v] + w(u, v)
+    let mut positive_graph: Vec<Vec<Option<i32>>> = Vec::new();
+    added_graph.pop();
+    for row in added_graph.into_iter() {
+        positive_graph.push(row[..row.len() - 1].iter().cloned().collect());
+    }
+    for u in 0..positive_graph.len() {
+        for v in 0..positive_graph.len() {
+            if let Some(mut weight) = positive_graph[u][v] {
+                if let (Some(du), Some(dv)) = (distances[u], distances[v]) {
+                    positive_graph[u][v] = Some(weight + du - dv);
+                }
+            }
+        }
+    }
+    //Now all the weights have been made positive
+    positive_graph
+}
+
+pub fn find_the_city(cities: i32, edges: Vec<Vec<i32>>, distance_threshold: i32) -> Option<usize> {
+    let cities = cities as usize;
+    let mut distances = vec![vec![None; cities]; cities];
+    for edge in edges {
+        distances[edge[0] as usize][edge[1] as usize] = Some(edge[2]);
+        distances[edge[1] as usize][edge[0] as usize] = Some(edge[2]);
+    }
+
+    for i in 0..cities {
+        distances[i][i] = Some(0);
+    }
+
+    for via in 0..cities {
+        for i in 0..cities {
+            for j in 0..cities {
+                match (distances[i][via], distances[via][j]) {
+                    (Some(dist_via_i), Some(dist_via_j)) => distances[i][j] = Some(std::cmp::min(
+                        distances[i][j].unwrap_or(i32::MAX), dist_via_i + dist_via_j,
+                    )),
+                    (Some(_), None) => continue,
+                    (None, Some(_)) => continue,
+                    (None, None) => continue
+                }
+            }
+        }
+    }
+
+    distances.iter()
+        .map(|row| row.iter()
+            .filter_map(|&x| x)
+            .filter(|&x| x <= distance_threshold)
+            .count() - 1)
+        .enumerate()
+        .min_by_key(|&(city, count)| (count, Reverse(city)))
+        .map(|(city, _)| city)
+}
+
+/*
+ A spanning tree is a subset of a graph G, such that all the vertices are connected using the minimum possible number of edges, i.e. if there are n nodes and n-1 edges and all nodes are reachable from each other.
+ Thus, a spanning tree has no cycles and a graph may have more than one spanning tree
+ A minimum spanning tree is the spanning tree with minimum weight (sum of all weights) among all the possible spanning trees
+*/
+///It is a greedy algorithm to build the MST of a graph. T.C. = O(V^2) (adjacency matrix) O((V+E) logV) (adjacency list)
+pub fn prim_algorithm(adj_list: Vec<Vec<(usize, i32)>>) -> (i32, Vec<(usize, usize)>) {
+    let mut vis = vec![false; adj_list.len()];
+    let mut heap = BinaryHeap::new(); //Weight, Node, Parent
+    heap.push(Reverse((0, (0, None))));
+    let mut weight_sum = 0;
+    let mut mst_edges = Vec::new();
+
+    while let Some(Reverse((weight, (node, parent)))) = heap.pop() {
+        if !vis[node] {
+            vis[node] = true;
+            weight_sum += weight;
+            if let Some(parent) = parent {
+                mst_edges.push((parent, node));
+            }
+
+            for &(adj_node, edge_weight) in &adj_list[node] {
+                if !vis[adj_node] {
+                    heap.push(Reverse((edge_weight, (adj_node, Some(node)))));
+                }
+            }
+        }
+    }
+
+    (weight_sum, mst_edges)
+}
+
+// A Disjoint Set (DSU) or Union-Find Structures are generally used in problems with connections and dividing things in groups.
+pub struct DisjointSet {
+    parent: Vec<usize>, //This stores the super-parent (parent of parent...)
+    rank: Vec<usize>, //This generally refers to the distance between the node and the furthest leaf node
+    size: Vec<usize>, //This is the number of nodes below any particular node
+}
+
+//In a problem, we can use either Union by Rank or by Size but not both
+impl DisjointSet {
+    pub fn new(n: usize) -> Self {
+        let parent: Vec<usize> = (0..n).collect();
+        let rank = vec![0; n];
+        let size = vec![1; n];
+
+        DisjointSet { parent, rank, size }
+    }
+
+    pub fn find_ultimate_parent(&mut self, node: usize) -> usize { //T.C. = O(log n)
+        if self.parent[node] == node {
+            node
+        } else {
+            self.parent[node] = self.find_ultimate_parent(self.parent[node]); //This is the path compression step
+            self.parent[node]
+        }
+    }
+    ///First find the ranks of the ultimate parents of u and v. Connect the smaller rank to the larger rank
+    pub fn union_by_rank(&mut self, u: usize, v: usize) {
+        let ultimate_parent_u = self.find_ultimate_parent(u);
+        let ultimate_parent_v = self.find_ultimate_parent(v);
+
+        if ultimate_parent_u == ultimate_parent_v { //If they are already in the same component
+            return; //There is no point in connecting them
+        }
+
+        match self.rank[ultimate_parent_u].cmp(&self.rank[ultimate_parent_v]) {
+            Ordering::Less => self.parent[ultimate_parent_u] = ultimate_parent_v,
+            Ordering::Equal => self.parent[ultimate_parent_v] = ultimate_parent_u,
+            Ordering::Greater => {
+                self.parent[ultimate_parent_u] = ultimate_parent_v; //Since they are equal we can do the other way as well
+                self.rank[ultimate_parent_u] += 1;
+            }
+        }
+    }
+
+    pub fn union_by_size(&mut self, u: usize, v: usize) {
+        let ultimate_parent_u = self.find_ultimate_parent(u);
+        let ultimate_parent_v = self.find_ultimate_parent(v);
+
+        if ultimate_parent_u == ultimate_parent_v {
+            return;
+        }
+
+        match self.size[ultimate_parent_u].cmp(&self.size[ultimate_parent_v]) {
+            Ordering::Less => {
+                self.parent[ultimate_parent_u] = ultimate_parent_v;
+                self.size[ultimate_parent_v] += self.size[ultimate_parent_u];
+            }
+            Ordering::Equal => {
+                self.parent[ultimate_parent_v] = ultimate_parent_u;
+                self.size[ultimate_parent_u] += self.size[ultimate_parent_v];
+            }
+            Ordering::Greater => {
+                self.parent[ultimate_parent_u] = ultimate_parent_v;
+                self.size[ultimate_parent_v] += self.size[ultimate_parent_u];
+            }
+        }
+    }
+}
+
+///It is also used to find the MST. T.C. = O()
+pub fn kruskal_algorithm(adj_list: Vec<Vec<(usize, i32)>>) -> (i32, Vec<(usize, usize)>) {
+    let mut edges = Vec::new();
+
+    for vertex in 0..adj_list.len() {
+        for &(adj_node, weight) in &adj_list[vertex] {
+            //Since the graph is bidirectional, each edge will be stored twice but the Disjoint Set will take care of it
+            edges.push((weight, vertex, adj_node));
+        }
+    }
+
+    edges.sort();
+
+    let mut ds = DisjointSet::new(adj_list.len());
+    let mut weight_sum = 0;
+    let mut mst_edges = Vec::new();
+
+    for &(weight, u, v) in &edges {
+        if ds.find_ultimate_parent(u) != ds.find_ultimate_parent(v) {
+            weight_sum += weight;
+            mst_edges.push((u, v));
+            ds.union_by_rank(u, v);
+        }
+    }
+
+    (weight_sum, mst_edges)
+}
+
+pub fn number_of_province_dsu(adj_matrix: Vec<Vec<i32>>) -> i32 {
+    //All connected components will have the same ultimate parent
+    let mut ds = DisjointSet::new(adj_matrix.len());
+    for i in 0..adj_matrix.len() {
+        for j in 0..adj_matrix.len() {
+            if adj_matrix[i][j] == 1 {
+                ds.union_by_rank(i, j);
+            }
+        }
+    }
+
+    ds.parent.iter().enumerate()
+        .filter(|&(index, &parent)| index == parent).count() as i32
+}
+
+pub fn make_connected(computers: i32, connections: Vec<Vec<i32>>) -> i32 {
+    let mut ds = DisjointSet::new(computers as usize);
+    let mut extra_cables = 0; //These extra edges can be used to connect non-connected components
+    for edge in connections {
+        let (u, v) = (edge[0] as usize, edge[1] as usize);
+        if ds.find_ultimate_parent(u) == ds.find_ultimate_parent(v) {
+            extra_cables += 1;
+        } else {
+            ds.union_by_rank(u, v);
+        }
+    }
+    let components = ds.parent.iter().enumerate() //These are the non-connected components
+        .filter(|&(index, &parent)| index == parent).count() as i32;
+
+    let required_cables = components - 1; //Cables that will be required to connect the components
+
+    if extra_cables >= required_cables {
+        required_cables
+    } else {
+        -1
+    }
+}
+
+///If two entries with the same name have one same email, then merge in the sorted order.
+pub fn accounts_merge(accounts: Vec<Vec<String>>) -> Vec<Vec<String>> {
+    let mut mail_map = HashMap::new(); //Mail, Parent of the mail (index)
+    let mut ds = DisjointSet::new(accounts.len());
+    //Create the Disjoint Set
+    for (index, &ref account) in accounts.iter().enumerate() {
+        for mail in account.iter().skip(1) {
+            if let Some(&prev) = mail_map.get(mail) {
+                ds.union_by_size(index, prev); //If mail already in the account, make old index the parent
+            } else {
+                mail_map.insert(mail.clone(), index); //Add to map
+            }
+        }
+    }
+
+    let mut merged_mails = vec![Vec::new(); accounts.len()];
+
+    for (mail, parent) in mail_map {
+        let index = ds.find_ultimate_parent(parent);
+        merged_mails[index].push(mail);
+    }
+
+    merged_mails.iter_mut().for_each(|x| x.sort()); //Sort the accounts
+
+    for (i, merged_mail) in merged_mails.iter_mut().enumerate() { //Add names to the accounts
+        if merged_mail.is_empty() {
+            continue;
+        }
+
+        merged_mail.insert(0, accounts[i][0].clone());
+    }
+
+    merged_mails.retain(|account| !account.is_empty()); //Remove empty accounts
+
+    merged_mails
+}
+
+//This is the best problem for a DSU since the graph is changing (node queries[i] are added).
+///We need to find the number of islands after each query
+pub fn num_islands_2(rows: usize, columns: usize, queries: Vec<(usize, usize)>) -> Vec<i32> {
+    let mut vis = vec![vec![false; columns]; rows];
+    const DIRECTIONS: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
+    let cell_number = |row: usize, col: usize| { row * columns + col }; //Give each cell a corresponding number
+    let is_valid = |row: i32, col: i32| { row >= 0 && row < rows as i32 && col >= 0 && col < columns as i32 };
+    let mut ds = DisjointSet::new(rows * columns);
+    let mut islands = 0;
+    let mut responses = Vec::with_capacity(queries.len());
+
+    for (row, col) in queries {
+        if vis[row][col] {
+            responses.push(islands);
+            continue;
+        }
+
+        vis[row][col] = true;
+        islands += 1;
+
+        for direction in DIRECTIONS {
+            let new_row = row as i32 + direction.0;
+            let new_col = col as i32 + direction.1;
+
+            if is_valid(new_row, new_col) {
+                let new_row = new_row as usize;
+                let new_col = new_col as usize;
+                if vis[new_row][new_col] {
+                    let cell = cell_number(row, col);
+                    let adj_cell = cell_number(new_row, new_col);
+
+                    if ds.find_ultimate_parent(cell) != ds.find_ultimate_parent(adj_cell) { //If the adjacent cells connect,
+                        islands -= 1; // reduce 1 island
+                        ds.union_by_size(cell, adj_cell);
+                    }
+                }
+            }
+        }
+
+        responses.push(islands);
+    }
+
+    responses
+}
+
+///Change at most one cell from 0 -> 1 and return the size of longest island
+pub fn largest_island(grid: Vec<Vec<i32>>) -> i32 {
+    let n = grid.len();
+    const DIRECTIONS: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
+    let cell_number = |row: usize, col: usize| { row * n + col }; //Give each cell a corresponding number
+    let is_valid = |row: i32, col: i32| { row >= 0 && row < n as i32 && col >= 0 && col < n as i32 };
+    let mut ds = DisjointSet::new(n * n);
+
+    for row in 0..n {
+        for col in 0..n {
+            if grid[row][col] == 0 {
+                continue;
+            }
+
+            for direction in DIRECTIONS {
+                let new_row = row as i32 + direction.0;
+                let new_col = col as i32 + direction.1;
+
+                if is_valid(new_row, new_col) {
+                    let new_row = new_row as usize;
+                    let new_col = new_col as usize;
+                    let cell = cell_number(row, col);
+                    let adj_cell = cell_number(new_row, new_col);
+                    if grid[new_row][new_col] == 1 {
+                        ds.union_by_size(cell, adj_cell);
+                    }
+                }
+            }
+        }
+    }
+
+    let mut max_size = 0;
+    for row in 0..n {
+        for col in 0..n {
+            if grid[row][col] == 1 {
+                continue;
+            }
+            let mut set = HashSet::new();
+            for direction in DIRECTIONS {
+                let new_row = row as i32 + direction.0;
+                let new_col = col as i32 + direction.1;
+
+                if is_valid(new_row, new_col) {
+                    let new_row = new_row as usize;
+                    let new_col = new_col as usize;
+                    let adj_cell = cell_number(new_row, new_col);
+                    if grid[new_row][new_col] == 1 {
+                        set.insert(ds.find_ultimate_parent(adj_cell));
+                    }
+                }
+            }
+            max_size = max_size.max(1 + set.iter().map(|&x| ds.size[x]).sum::<usize>());
+        }
+    }
+
+    for cell in 0..n * n {
+        let ult = ds.find_ultimate_parent(cell);
+        max_size = max_size.max(ds.size[ult]);
+    }
+
+    max_size as i32
+}
+
+///A stone can be removed if it shares the same row/column with a stone that has not been removed
+pub fn remove_stones(stones: Vec<Vec<i32>>) -> i32 {
+    //Consider stones in the same row or column to form a component. We can remove all but 1 from each of these components.
+    //Consider k components each with n_i stones. The stones which can be removed are = (n_1-1)+(n_2-1)+... = n-k
+    let (mut rows, mut columns) = (0, 0);
+    for pos in &stones {
+        rows = rows.max(pos[0] as usize);
+        columns = columns.max(pos[1] as usize);
+    }
+    //Change the column numbers to get indices different from rows
+    let mut ds = DisjointSet::new(rows + columns + 2);
+    let mut stone_nodes = HashSet::new();
+
+    for pos in &stones {
+        let row = pos[0] as usize;
+        let col = pos[1] as usize + rows + 1;
+        ds.union_by_size(row, col);
+        stone_nodes.insert(row);
+        stone_nodes.insert(col);
+    }
+
+    let mut components = 0;
+    for node in stone_nodes {
+        if ds.find_ultimate_parent(node) == node {
+            components += 1;
+        }
+    }
+
+    stones.len() as i32 - components
+}
+
+//A graph is said to be strongly connected if every vertex is reachable from every other vertex
+///Kosaraju's Algorithm is used to find the strongly connected components of a directed graph. T.C. = O(V+E) for adjacency list and O(V^2) for adjacency matrix
+pub fn kosaraju_algorithm(adj_list: Vec<Vec<usize>>) -> Vec<Vec<usize>> {
+    let mut vis = vec![false; adj_list.len()];
+    let mut stack = VecDeque::new();
+    fn helper(node: usize, adj_list: &Vec<Vec<usize>>, vis: &mut Vec<bool>, stack: &mut VecDeque<usize>) { //DFS
+        vis[node] = true;
+        for &adj_node in &adj_list[node] {
+            if !vis[adj_node] {
+                helper(adj_node, adj_list, vis, stack);
+            }
+        }
+        stack.push_back(node);
+    }
+
+    for node in 0..adj_list.len() {
+        if !vis[node] {
+            helper(node, &adj_list, &mut vis, &mut stack);
+        }
+    }
+
+    //Reverse the graph
+    let mut reversed_adj_list = vec![Vec::new(); adj_list.len()];
+    for node in 0..adj_list.len() {
+        vis[node] = false; //Unmark the node
+        for &adj_node in &adj_list[node] {
+            reversed_adj_list[adj_node].push(node);
+        }
+    }
+
+    let mut scc = Vec::new();
+    let mut component = Vec::new();
+    fn helper_rev(node: usize, adj_list: &Vec<Vec<usize>>, vis: &mut Vec<bool>, component: &mut Vec<usize>) {
+        vis[node] = true;
+        component.push(node);
+
+        for &adj_node in &adj_list[node] {
+            if !vis[adj_node] {
+                helper_rev(adj_node, adj_list, vis, component);
+            }
+        }
+    }
+
+    while let Some(node) = stack.pop_back() {
+        if !vis[node] {
+            helper_rev(node, &reversed_adj_list, &mut vis, &mut component);
+            component.sort();
+            scc.push(component.clone());
+            component.clear();
+        }
+    }
+
+    scc
+}
+
+//A bridge is an edge which when broken results in 2 or more components
+pub fn tarjan_algorithm(adj_list: Vec<Vec<usize>>) -> Vec<(usize, usize)> {
+    let mut vis = vec![false; adj_list.len()];
+    let mut insertion_time = vec![0; adj_list.len()]; //This is the time at which the dfs call reaches the node
+    let mut lowest_visit_time = vec![0; adj_list.len()]; //This is the lowest time of all adjacent nodes (except parent)
+    let mut bridges = Vec::new();
+
+    fn helper(node: usize, parent: Option<usize>, adj_list: &Vec<Vec<usize>>, vis: &mut Vec<bool>, mut timer: i32, insertion_time: &mut Vec<i32>, lowest_visit_time: &mut Vec<i32>, bridges: &mut Vec<(usize, usize)>) { //DFS Traversal
+        vis[node] = true;
+
+        insertion_time[node] = timer;
+        lowest_visit_time[node] = timer;
+        timer += 1;
+
+        for &adj_node in &adj_list[node] {
+            if Some(adj_node) != parent {
+                if !vis[adj_node] {
+                    helper(adj_node, Some(node), adj_list, vis, timer, insertion_time, lowest_visit_time, bridges);
+                    lowest_visit_time[node] = lowest_visit_time[node].min(lowest_visit_time[adj_node]);
+
+                    if lowest_visit_time[adj_node] > insertion_time[node] { //If it is a bridge
+                        bridges.push((node, adj_node));
+                    }
+                } else { //This cannot be a bridge
+                    lowest_visit_time[node] = lowest_visit_time[node].min(lowest_visit_time[adj_node]);
+                }
+            }
+        }
+    }
+
+    helper(0, None, &adj_list, &mut vis, 1, &mut insertion_time, &mut lowest_visit_time, &mut bridges);
+
+    bridges
+}
+
+///An articulation point is a node on whose removal breaks the graph into multiple components
+pub fn articulation_points(adj_list: Vec<Vec<usize>>) -> Vec<usize> {
+    let mut vis = vec![false; adj_list.len()];
+    let mut insertion_time = vec![0; adj_list.len()];
+    let mut lowest_visit_time = vec![0; adj_list.len()]; //This is the lowest time of all adjacent nodes (except parent and visited nodes)
+    let mut points = Vec::new();
+
+    fn helper(node: usize, parent: Option<usize>, adj_list: &Vec<Vec<usize>>, vis: &mut Vec<bool>, mut timer: i32, insertion_time: &mut Vec<i32>, lowest_visit_time: &mut Vec<i32>, points: &mut Vec<usize>) {
+        vis[node] = true;
+
+        insertion_time[node] = timer;
+        lowest_visit_time[node] = timer;
+        timer += 1;
+
+        for &adj_node in &adj_list[node] {
+            if Some(adj_node) == parent {
+                continue;
+            }
+
+            if !vis[adj_node] {
+                helper(adj_node, Some(node), adj_list, vis, timer, insertion_time, lowest_visit_time, points);
+                lowest_visit_time[node] = lowest_visit_time[node].min(lowest_visit_time[adj_node]);
+
+                if lowest_visit_time[adj_node] >= insertion_time[node] && parent.is_some() {
+                    points.push(node);
+                }
+            } else {
+                lowest_visit_time[node] = lowest_visit_time[node].min(lowest_visit_time[adj_node]);
+            }
+        }
+    }
+
+    helper(0, None, &adj_list, &mut vis, 0, &mut insertion_time, &mut lowest_visit_time, &mut points);
+
+    points
 }
 
 #[cfg(test)]
@@ -1216,16 +1943,6 @@ mod tests {
             vec![0, 0, 0, 0],
         ]), 0);
     }
-
-    // #[test]
-    /*fn number_of_distinct_islands_test() {
-        assert_eq!(number_of_distinct_islands(vec![
-            vec![1, 1, 0, 0, 0],
-            vec![1, 0, 0, 0, 0],
-            vec![0, 0, 0, 0, 1],
-            vec![0, 0, 0, 1, 1],
-        ]), 1);
-    }*/
 
     #[test]
     fn is_bipartite_test() {
@@ -1443,5 +2160,234 @@ mod tests {
             vec![5, 3, 5],
         ];
         assert_eq!(minimum_effort_path(matrix), 1);
+    }
+
+    #[test]
+    fn cheapest_flight_test() {
+        let graph = vec![
+            vec![(1, 100)],
+            vec![(2, 100), (3, 600)],
+            vec![(0, 100)],
+            vec![],
+        ];
+        assert_eq!(find_cheapest_price(4, graph, 0, 3, 1), Some(700));
+    }
+
+    #[test]
+    fn network_test() {
+        assert_eq!(network_delay_time(vec![vec![1, 2, 1]], 2, 2), -1);
+    }
+
+    #[test]
+    fn min_multiplications_test() {
+        assert_eq!(minimum_multiplications_to_reach_end(vec![2, 5, 7], 3, 30), 2);
+        assert_eq!(minimum_multiplications_to_reach_end(vec![3, 4, 65], 7, 66175), 4);
+    }
+
+    #[test]
+    fn count_paths_test() {
+        let data: Vec<Vec<(usize, i32)>> = vec![
+            vec![(6, 7), (1, 2), (4, 5)],
+            vec![(0, 2), (2, 3), (3, 3)],
+            vec![(1, 3), (5, 1)],
+            vec![(1, 3), (6, 3), (5, 1)],
+            vec![(0, 5), (6, 2)],
+            vec![(3, 1), (6, 1), (2, 1)],
+            vec![(0, 7), (3, 3), (5, 1), (4, 2)],
+        ];
+        assert_eq!(count_paths(data), 4);
+    }
+
+    #[test]
+    fn bellman_ford_test() {
+        let data = vec![
+            vec![(1, 1), (2, 6)],
+            vec![(2, 3), (0, 1)],
+            vec![(1, 3), (0, 6)],
+        ];
+        assert_eq!(bellman_ford_algorithm(data), Ok(vec![Some(0), Some(1), Some(4)]));
+    }
+
+    #[test]
+    fn find_city_test() {
+        assert_eq!(find_the_city(4, vec![
+            vec![0, 1, 3],
+            vec![1, 2, 1],
+            vec![1, 3, 4],
+            vec![2, 3, 1],
+        ], 4), Some(3));
+
+        assert_eq!(find_the_city(5, vec![
+            vec![0, 1, 2],
+            vec![0, 4, 8],
+            vec![1, 2, 3],
+            vec![1, 4, 2],
+            vec![2, 3, 1],
+            vec![3, 4, 1],
+        ], 2), Some(0));
+    }
+
+    #[test]
+    fn johnson_algorithm_test() {
+        let graph = vec![
+            vec![Some(0), Some(4), None, None, Some(1)],
+            vec![None, Some(0), None, None, None],
+            vec![None, Some(7), Some(0), Some(-2), None],
+            vec![None, Some(1), None, Some(0), None],
+            vec![None, None, None, Some(-5), Some(0)],
+        ];
+
+        let positive = vec![
+            vec![Some(0), Some(8), None, None, Some(1)],
+            vec![None, Some(0), None, None, None],
+            vec![None, Some(11), Some(0), Some(3), None],
+            vec![None, Some(0), None, Some(0), None],
+            vec![None, None, None, Some(0), Some(0)],
+        ];
+
+        assert_eq!(johnson_algorithm(graph), positive);
+    }
+
+    #[test]
+    fn prim_algorithm_test() {
+        let graph = vec![
+            vec![(1, 2), (2, 1)],
+            vec![(0, 2), (2, 1)],
+            vec![(0, 1), (1, 1), (3, 2), (4, 2)],
+            vec![(2, 2), (4, 1)],
+            vec![(2, 2), (3, 2)],
+        ];
+
+        assert_eq!(prim_algorithm(graph), (5, vec![(0, 2), (2, 1), (2, 3), (3, 4)]));
+    }
+
+    #[test]
+    fn kruskal_algorithm_test() {
+        let graph = vec![
+            vec![(1, 2), (2, 1)],
+            vec![(0, 2), (2, 1)],
+            vec![(0, 1), (1, 1), (3, 2), (4, 2)],
+            vec![(2, 2), (4, 1)],
+            vec![(2, 2), (3, 2)],
+        ];
+
+        assert_eq!(kruskal_algorithm(graph), (5, vec![(0, 2), (1, 2), (3, 4), (2, 3)]));
+    }
+
+    #[test]
+    fn provinces_test_with_dsu() {
+        assert_eq!(number_of_province_dsu(vec![
+            vec![1, 1, 0],
+            vec![1, 1, 0],
+            vec![0, 0, 1],
+        ]), 2);
+        assert_eq!(number_of_province_dsu(vec![
+            vec![1, 0, 0],
+            vec![0, 1, 0],
+            vec![0, 0, 1],
+        ]), 3);
+    }
+
+    #[test]
+    fn make_connected_test() {
+        assert_eq!(make_connected(4, vec![vec![0, 1], vec![0, 2], vec![1, 2]]), 1);
+        assert_eq!(make_connected(11, vec![
+            vec![1, 4],
+            vec![0, 3],
+            vec![1, 3],
+            vec![3, 7],
+            vec![2, 7],
+            vec![0, 1],
+            vec![2, 4],
+            vec![3, 6],
+            vec![5, 6],
+            vec![6, 7],
+            vec![4, 7],
+            vec![0, 7],
+            vec![5, 7],
+        ]), 3);
+    }
+
+    #[test]
+    fn merge_accounts_test() {
+        let accounts = vec![
+            vec!["John".to_string(), "johnsmith@mail.com".to_string(), "john_newyork@mail.com".to_string()],
+            vec!["John".to_string(), "johnsmith@mail.com".to_string(), "john00@mail.com".to_string()],
+            vec!["Mary".to_string(), "mary@mail.com".to_string()],
+            vec!["John".to_string(), "johnnybravo@mail.com".to_string()],
+        ];
+        accounts_merge(accounts);
+    }
+
+    #[test]
+    fn number_of_islands_two_test() {
+        assert_eq!(num_islands_2(3, 3, vec![(0, 0), (0, 1), (1, 2), (2, 1)]), vec![1, 1, 2, 3]);
+    }
+
+    #[test]
+    fn large_island_test() {
+        assert_eq!(largest_island(vec![vec![1, 0], vec![0, 1]]), 3);
+        assert_eq!(largest_island(vec![vec![1, 1], vec![1, 0]]), 4);
+        assert_eq!(largest_island(vec![vec![1, 1], vec![1, 1]]), 4);
+    }
+
+    #[test]
+    fn stone_removal_test() {
+        assert_eq!(remove_stones(vec![
+            vec![0, 0],
+            vec![0, 1],
+            vec![1, 0],
+            vec![1, 2],
+            vec![2, 1],
+            vec![2, 2],
+        ]), 5);
+
+        assert_eq!(remove_stones(vec![
+            vec![0, 0],
+            vec![0, 2],
+            vec![1, 1],
+            vec![2, 0],
+            vec![2, 2],
+        ]), 3);
+
+        assert_eq!(remove_stones(vec![
+            vec![4, 5],
+            vec![0, 4],
+            vec![0, 5],
+            vec![4, 3],
+            vec![2, 2],
+            vec![5, 1],
+            vec![0, 3],
+            vec![2, 4],
+            vec![4, 0],
+        ]), 7);
+    }
+
+    #[test]
+    fn kosaraju_test() {
+        let mut graph = vec![
+            vec![1],
+            vec![2],
+            vec![0, 3],
+            vec![4],
+            vec![5, 7],
+            vec![6],
+            vec![4],
+            vec![],
+        ];
+
+        assert_eq!(kosaraju_algorithm(graph), vec![vec![0, 1, 2], vec![3], vec![4, 5, 6], vec![7]]);
+    }
+
+    #[test]
+    fn bridges_test() {
+        let graph = vec![
+            vec![1, 2],
+            vec![0, 2, 3],
+            vec![0, 1],
+            vec![1],
+        ];
+
+        assert_eq!(tarjan_algorithm(graph), vec![(1, 3)]);
     }
 }
