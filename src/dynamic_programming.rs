@@ -24,7 +24,7 @@ pub fn fibonacci_better(n: i32) -> i32 {
 
     dp[n]
 }
-//Even this can be optimised, since only the last two values are being used, only use them
+//Even this can be optimized, since only the last two values are being used, only use them
 
 pub fn fibonacci_best(n: i32) -> i32 {
     let (mut prev1, mut prev2) = (1, 1);
@@ -160,14 +160,14 @@ pub fn rob_optimised(houses: &[i32]) -> i32 {
     prev1
 }
 
-///Here, the houses are in a circle (1st and last are connected)
+///Here, the houses are in a circle (first and last are connected)
 pub fn rob_2(houses: &[i32]) -> i32 {
     //Take either the first house or the last house
     std::cmp::max(rob_optimised(&houses[1..]), rob_optimised(&houses[..houses.len() - 1]))
 }
 
 //Now we see 2-D dynamic programming
-///The training is of n days, each day with 3 activities, same activity cannot be done on two consecutive days
+///The training is of n days, each day with three activities, the same activity cannot be done on two consecutive days
 pub fn maximum_points(points: Vec<Vec<i32>>) -> i32 {
     let mut dp = vec![vec![-1; 3]; points.len()];
     fn helper(points: &Vec<Vec<i32>>, current_day: usize, prev_task: usize, dp: &mut Vec<Vec<i32>>) -> i32 {
@@ -391,7 +391,7 @@ mod tests {
     }
 
     #[test]
-    fn unique_paths_with_obstaces_test() {
+    fn unique_paths_with_obstacles_test() {
         assert_eq!(unique_path_with_obstacles(vec![
             vec![0, 0, 0],
             vec![0, 1, 0],

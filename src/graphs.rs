@@ -1,6 +1,6 @@
 /*
 A graph is defined as a group of vertices and edges (used to connect the vertices). Any two connected vertices are called adjacent nodes
-The degree of a node is the number of edges falling on it. A self loop adds 2 to the degree. An isolated node has d(V) = 0
+The degree of a node is the number of edges falling on it. A self-loop adds 2 to the degree. An isolated node has d(V) = 0
 
 Types of Graphs are Finite, Infinite, Trivial, Simple, Multi, NULL, Complete, Pseudo, Regular, Labelled, Directed, Bipartite
 A null graph is one with more than one vertex but no edges
@@ -8,18 +8,17 @@ A graph which contains both parallel edges and self-loops are called pseudo grap
 A graph where each edge has a weight or any information is called a labelled graph
 
 REPRESENTATION OF GRAPHS
-Adjacency Matrix :- In this if there is an edge between a and b, mark matrix[a][b] = matrix[b][a] = 1 (Or the weight of the edge). This uses O(n*m) space
-Adjacency List :- In this the ith index stores the vertices connected to i Uses O(2E) space. It is the most common and efficient for sparse graphs
-The drawbacks of the above are when we use Sparse Matrices (where 0s are more), it wastes a lot of memory, thus, we use Linked Lists to save memory
+Adjacency Matrix:-In this if there is an edge between A and B, mark matrix[A][B] = matrix[B][A] = 1 (Or the weight of the edge). This uses O(n*m) space
+Adjacency List:-In this the ith index stores the vertices connected to i Uses O(2E) space. It is the most common and efficient for sparse graphs
+The drawbacks of the above are when we use Sparse Matrices (where 0s are more), it wastes a lot of memory; thus, we use Linked Lists to save memory
  */
 
 use std::cmp::{Ordering, Reverse};
 use std::collections::{HashSet, VecDeque, HashMap, BinaryHeap};
 use std::ops::Index;
-use itertools::Itertools;
 
 //TRAVERSAL TECHNIQUES (A graph can either start from 0 or 1, I will start my graphs from 1 unless the question states otherwise)
-// Breadth-First-Search (BFS) uses a queue (can use recursion but basically the same algorithm, thus not worth it). T.C. = O(V+E) & S.C. = O(V)
+//Breadth-First-Search (BFS) uses a queue data structure (can use recursion but basically the same algorithm, thus not worth it). T.C. = O(V+E) & S.C. = O(V)
 pub fn breadth_first_search(adj_list: Vec<Vec<usize>>) -> Vec<usize> {
     //A vis(ited) array stores the nodes which have already been visited
     let mut vis = vec![false; adj_list.len() + 1]; //+1 because of 1-based indexing
@@ -43,7 +42,7 @@ pub fn breadth_first_search(adj_list: Vec<Vec<usize>>) -> Vec<usize> {
     bfs
 }
 
-//Depth-First-Search (DFS) uses either recursion or stack. T.C. = O(V+2E) (undirected) O(V+E) (directed) when using adjacency list. But when E≅V^2, matrix has better time complexity of O(V^2) & S.C. = O(V)
+//Depth-First-Search (DFS) uses either recursion or stack. T.C. = O(V+2E) (undirected) O(V+E) (directed) when using an adjacency list. But when E≅V^2, matrix has better time complexity of O(V^2) & S.C. = O(V)
 pub fn depth_first_search_recursive(adj_list: Vec<Vec<usize>>) -> Vec<usize> {
     let mut vis = vec![false; adj_list.len() + 1];
     let mut dfs = Vec::new();
@@ -172,7 +171,7 @@ pub fn oranges_rotting(grid: Vec<Vec<i32>>) -> Option<i32> {
         }
     }
 
-    //If there is some orange which cannot be rotten
+    //If there is some orange that cannot be rotten
     for row in 0..n {
         for col in 0..m {
             if vis[row][col] != 2 && grid[row][col] == 1 {
@@ -474,7 +473,7 @@ pub fn eventual_safe_nodes(graph: Vec<Vec<usize>>) -> Vec<usize> {
             }
         }
 
-        check[node] = true; // If the node is not a part of a cycle it is eventually safe
+        check[node] = true; // If the node is not a part of a cycle, it is eventually safe
         path_vis[node] = false; //Backtracking
         false
     }
@@ -495,7 +494,7 @@ pub fn eventual_safe_nodes(graph: Vec<Vec<usize>>) -> Vec<usize> {
     safe_nodes
 }
 
-//Topological Sorting :- It is a linear ordering of vertices such that v appears before w if there is an edge between v->w. There may be multiple solutions. It can only be done for DAG
+//Topological Sorting:-It is a linear ordering of vertices such that v appears before w if there is an edge between v->w. There may be multiple solutions. It can only be done for DAG
 pub fn topological_sort(adj_list: Vec<Vec<usize>>) -> Vec<usize> {
     let mut vis = vec![false; adj_list.len()];
     let mut stack = VecDeque::new();
@@ -585,7 +584,7 @@ pub fn cycle_directed_topological(adj_list: Vec<Vec<usize>>) -> bool {
 ///prerequisites[i] = (a, b) which means we need to complete course b to take course a (b should be done before a)
 pub fn can_finish(num_courses: usize, prerequisites: Vec<(usize, usize)>) -> bool {
     //Courses cannot be finished iff there is a cycle in the task graph
-    let mut graph = vec![Vec::new(); num_courses]; //Creating the tasks graph
+    let mut graph = vec![Vec::new(); num_courses]; //Creating the "tasks" graph
     for &(a, b) in &prerequisites {
         graph[b].push(a);
     }
@@ -876,7 +875,7 @@ pub fn find_ladder_optimised(begin_word: String, end_word: String, word_list: Ve
 
 ///A min-heap has the minimum element as the root. T.C. = O(E log V). This works on positive weighted acyclic graphs
 pub fn dijkstra_algorithm_min_heap(adj_list: Vec<Vec<(usize, i32)>>, source: usize) -> Vec<Option<i32>> {
-    //In Rust a Binary Heap is by-default a max-heap. Reverse(T) is used to reverse the ordering
+    //In Rust, a Binary Heap is by-default a max-heap. Reverse(T) is used to reverse the ordering
     let mut heap: BinaryHeap<Reverse<(i32, usize)>> = BinaryHeap::new(); //Min-Heap/Priority Queue in C++
     let mut distances = vec![None; adj_list.len()];
     distances[source] = Some(0);
@@ -885,7 +884,7 @@ pub fn dijkstra_algorithm_min_heap(adj_list: Vec<Vec<(usize, i32)>>, source: usi
     while let Some(Reverse((distance, node))) = heap.pop() {
         for &(adj_node, edge_length) in &adj_list[node] {
             distances[adj_node] = match distances[adj_node] {
-                None => { //If the node has not been reached push it into the heap and update the distance
+                None => { //If the node has not been reached, push it into the heap and update the distance
                     heap.push(Reverse((distance + edge_length, adj_node)));
                     Some(distance + edge_length)
                 }
@@ -1086,7 +1085,7 @@ pub fn network_delay_time(data: Vec<Vec<i32>>, nodes: i32, source: i32) -> i32 {
 ///Multiply start with any number in nums (mod 1e5 if necessary) and find the number of steps to reach the end
 pub fn minimum_multiplications_to_reach_end(nums: Vec<i32>, start: i32, end: i32) -> i32 {
     const MOD: i32 = 1e5 as i32;
-    let mut multiplications = vec![i32::MAX; MOD as usize]; //Theses are all the numbers from 0..9999
+    let mut multiplications = vec![i32::MAX; MOD as usize]; //Theses are all the numbers from 0-9999
     multiplications[start as usize] = 0;
     //Here a heap is not necessary since the nodes will be traversed in order
     let mut queue = VecDeque::new(); //Steps, number
@@ -1148,7 +1147,7 @@ pub fn count_paths(adj_list: Vec<Vec<(usize, i32)>>) -> i32 {
     ways[adj_list.len() - 1]
 }
 
-///This algorithm also find the shortest path. This can handle negative weights, but it only works for directed graph. T.C. = O(VE)
+///This algorithm can also find the shortest path. This can handle negative weights, but it only works for directed graph. T.C. = O(VE)
 pub fn bellman_ford_algorithm(adj_list: Vec<Vec<(usize, i32)>>) -> Result<Vec<Option<i32>>, &'static str> {
     //Here, we 'relax' the edges (update the distance) V-1 for each vertex
     let mut distances = vec![None; adj_list.len()];
@@ -1212,8 +1211,8 @@ pub fn floyd_warshall_algorithm(adj_matrix: Vec<Vec<Option<i32>>>) -> Vec<Vec<Op
 
 ///This is a multi-source shortest path algorithm. It can find the distance between every possible pair. T.C. = O(V^2logV + VE). It is a combination of Dijkstra's and Bellman-Ford Algorithm
 ///Unlike Floyd-Warshall, it can handle negative weights
-pub fn johnson_algorithm(adj_matrix: Vec<Vec<Option<i32>>>) -> Vec<Vec<Option<i32>>> { //This simply converts all edge weights to positive
-    //Adding an extra vertex to perform Bellman-Ford. This new node is at a distance 0 from every other node
+pub fn johnson_algorithm(adj_matrix: Vec<Vec<Option<i32>>>) -> Vec<Vec<Option<i32>>> { //This simply converts all edge weights to positive.
+    //Adding an extra vertex to perform Bellman-Ford. This new node is at distance 0 from every other node
     let mut added_graph = adj_matrix.clone();
     for row in added_graph.iter_mut() {
         row.push(None);
@@ -1309,8 +1308,8 @@ pub fn find_the_city(cities: i32, edges: Vec<Vec<i32>>, distance_threshold: i32)
 }
 
 /*
- A spanning tree is a subset of a graph G, such that all the vertices are connected using the minimum possible number of edges, i.e. if there are n nodes and n-1 edges and all nodes are reachable from each other.
- Thus, a spanning tree has no cycles and a graph may have more than one spanning tree
+ A spanning tree is a subset of a graph G, such that all the vertices are connected using the minimum possible number of edges, i.e., if there are n nodes and n-1 edges and all nodes are reachable from each other.
+ Thus, a spanning tree has no cycles, and a graph may have more than one spanning tree
  A minimum spanning tree is the spanning tree with minimum weight (sum of all weights) among all the possible spanning trees
 */
 ///It is a greedy algorithm to build the MST of a graph. T.C. = O(V^2) (adjacency matrix) O((V+E) logV) (adjacency list)
@@ -1378,7 +1377,7 @@ impl DisjointSet {
             Ordering::Less => self.parent[ultimate_parent_u] = ultimate_parent_v,
             Ordering::Equal => self.parent[ultimate_parent_v] = ultimate_parent_u,
             Ordering::Greater => {
-                self.parent[ultimate_parent_u] = ultimate_parent_v; //Since they are equal we can do the other way as well
+                self.parent[ultimate_parent_u] = ultimate_parent_v; //Since they are equal, we can do the other way as well
                 self.rank[ultimate_parent_u] += 1;
             }
         }
@@ -1652,7 +1651,7 @@ pub fn remove_stones(stones: Vec<Vec<i32>>) -> i32 {
 }
 
 //A graph is said to be strongly connected if every vertex is reachable from every other vertex
-///Kosaraju's Algorithm is used to find the strongly connected components of a directed graph. T.C. = O(V+E) for adjacency list and O(V^2) for adjacency matrix
+///Kosaraju's Algorithm is used to find the strongly connected components of a directed graph. T.C. = O(V+E) for an adjacency list and O(V^2) for an adjacency matrix
 pub fn kosaraju_algorithm(adj_list: Vec<Vec<usize>>) -> Vec<Vec<usize>> {
     let mut vis = vec![false; adj_list.len()];
     let mut stack = VecDeque::new();
@@ -2365,7 +2364,7 @@ mod tests {
 
     #[test]
     fn kosaraju_test() {
-        let mut graph = vec![
+        let graph = vec![
             vec![1],
             vec![2],
             vec![0, 3],

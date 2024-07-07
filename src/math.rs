@@ -25,10 +25,10 @@ pub fn gcd(a: i32, b: i32) -> i32 {
         return a;
     }
 
-    if a > b {
-        return gcd(a % b, b);
+    return if a > b {
+        gcd(a % b, b)
     } else {
-        return gcd(b % a, a);
+        gcd(b % a, a)
     }
 }
 

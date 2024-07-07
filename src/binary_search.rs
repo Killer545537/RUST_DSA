@@ -23,7 +23,7 @@ pub fn binary_search<T: Ord>(arr: &[T], target: &T) -> Option<usize> {
     None
 }
 
-//It is the smallest index such that arr[i] >= target, i.e. it is the index of the smallest number greater than or equal to the target
+//It is the smallest index such that arr[i] >= target, i.e., it is the index of the smallest number greater than or equal to the target
 //This is also called ceil, but upper_bound IS NOT floor
 pub fn lower_bound(arr: &[i32], target: i32) -> Option<usize> { //This is also the find search_index problem
     let (mut low, mut high) = (0, arr.len());
@@ -44,7 +44,7 @@ pub fn lower_bound(arr: &[i32], target: i32) -> Option<usize> { //This is also t
     }
 }
 
-//It is the smallest index 'i' such that arr[i] > target, i.e. it is the index of the smallest number greater than the target
+//It is the smallest index 'i' such that arr[i] > target, i.e., it is the index of the smallest number greater than the target
 pub fn upper_bound(arr: &[i32], target: i32) -> Option<usize> {
     let (mut low, mut high) = (0, arr.len());
 
@@ -83,7 +83,7 @@ pub fn floor(arr: &[i32], target: i32) -> Option<usize> {
 }
 
 
-pub fn search_range(arr: &[i32], target: i32) -> Option<(usize, usize)> {//This is equivalent to finding the lower bound (1st occurrence) and the upper bound - 1 (last occurrence)
+pub fn search_range(arr: &[i32], target: i32) -> Option<(usize, usize)> {//This is equivalent to finding the lower bound (1st occurrence), and the upper bound - 1 (last occurrence)
     //This is also the number of occurrences of target in the array
     let first_occurrence = lower_bound(arr, target);
     let last_occurrence = upper_bound(arr, target);
@@ -93,7 +93,7 @@ pub fn search_range(arr: &[i32], target: i32) -> Option<(usize, usize)> {//This 
         if arr[first] != target {
             None
         } else {
-            Some((first, last_occurrence.unwrap_or(arr.len()) - 1)) //If last_occurrence is None it means that target is the last element
+            Some((first, last_occurrence.unwrap_or(arr.len()) - 1)) //If last_occurrence is None, it means that target is the last element
         }
     } else {
         None
@@ -140,7 +140,7 @@ pub fn search_sorted_unique(arr: &[i32], target: i32) -> Option<usize> {
 
 pub fn search_sorted(arr: &[i32], target: i32) -> bool {
     //This is essentially the same problem except the case when arr[low] = arr[mid] = arr[high]
-    // In that case we cannot find the sorted portion
+    // In that case, we cannot find the sorted portion
     let (mut low, mut high) = (0, arr.len() - 1);
 
     while low <= high {
@@ -181,7 +181,7 @@ pub fn find_min(arr: &[i32]) -> i32 { //This is also the number of times the arr
     while low <= high {
         let mid = (low + high) / 2;
 
-        if arr[low] <= arr[mid] {//Left portion of the array is sorted
+        if arr[low] <= arr[mid] {//The left portion of the array is sorted
             min = min.min(arr[low]);
             low = mid + 1;
         } else {
@@ -251,7 +251,7 @@ pub fn find_peak_element(arr: &[i32]) -> Option<usize> {
             low = mid + 1;
         } else if arr[mid] > arr[mid + 1] {
             high = mid - 1;
-        } else {//This is case where mid is at the trough (opposite of peak)
+        } else {//This is the case where mid is at the trough (opposite of peak)
             low = mid + 1; //Or high = mid - 1, since both the halves will have a peak
         }
     }
@@ -308,9 +308,9 @@ pub fn find_nth_root(n: i32, k: i32) -> i32 { //n√k
     -1
 }
 
-//We need to find the lowest possible bananas/hr so that all bananas are eaten
+//We need to find the lowest possible bananas/hr so that all bananas are eaten.
 // However, if a pile is finished in less than 1 complete hour, the rest of the time will be wasted (if 3 bananas and 2 banana/hr, then 2hr taken
-pub fn min_eating_speed(piles: &[i64], hours: i64) -> i64 { //Using i64 just to avoid overflow conditions
+pub fn min_eating_speed(piles: &[i64], hours: i64) -> i64 { //Using i64 just to avoid overflow conditions.
     //The maximum time taken will be when 1 banana/hr and min when max(piles)/hr
     let (mut low, mut high) = (1, *piles.iter().max().unwrap_or(&1));
 
@@ -426,7 +426,7 @@ pub fn find_kth_positive(arr: &[i32], k: i32) -> i32 {
 
     while low < high {
         let mid = (low + high) / 2;
-        /*  If all the numbers were present the array would look like ->
+        /*  If all the numbers were present, the array would look like ->
         Index -> 0 1 2 3 4 5 6
         Ele   -> 1 2 3 4 5 6 7 (i + 1)
         So, the number of missing elements till an index 'i' is arr[i] - (i + 1)  */
@@ -442,7 +442,7 @@ pub fn find_kth_positive(arr: &[i32], k: i32) -> i32 {
     /*  Now, after finding the high, the kth missing number will be,
     arr[high] + more (more is the number of missing left after high)
     more = k - missing
-    arr[high] + more = arr[high] + k - missing = high + 1 + k  = low + k */
+    arr[high] + more = arr[high] + k - missing = high + 1 + k = low + k */
     low as i32 + k
 }
 
@@ -493,7 +493,7 @@ pub fn aggressive_cows(stalls: &[i32], cows: i32) -> i32 {
 }
 
 //Here, each student must be given at least one book (if more, then in a contiguous manner)
-//Allocate books in such a way that the maximum number of pages given to a student is minimum, min(max(pages to a student))
+//Allocate books in such a way that the maximum number of pages given to a student is minimum, min (max (pages to a student))
 pub fn allocate_books(books: &[i32], students: i32) -> Option<i32> {
     //The only case when it is not possible to allocate books,
     if students > books.len() as i32 {
@@ -524,14 +524,14 @@ pub fn allocate_books(books: &[i32], students: i32) -> Option<i32> {
     Some(low)
 }
 
-//Here, we have two painters which take arr[i] time to do a task, we need to find the min of the maximum time taken (take only contiguous sub-arrays as tasks)
+//Here, we have two painters which take arr[i] time to do a task, we need to find the min of the maximum time taken (take only contiguous subarrays as tasks)
 pub fn painter_partition(arr: &[i32]) -> Option<i32> {
     arr.iter().enumerate()
         .map(|(i, _)| std::cmp::max(arr[..=i].iter().sum(), arr[i + 1..].iter().sum()))
         .min()
 }
 
-//Here, we need to split the array into k parts that the maximum sub-array is minimum (empty sub-arrays are not allowed)
+//Here, we need to split the array into k parts that the maximum subarray is minimum (empty subarrays are not allowed)
 //Exactly the same problem as allocate_books
 pub fn split_array(arr: &[i32], k: i32) -> i32 {
     let partitions = |possible_sum: i32| -> i32 {

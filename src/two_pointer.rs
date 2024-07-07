@@ -39,7 +39,7 @@ pub fn length_of_longest_substring(s: String) -> usize {
     max_len
 }
 
-///nums contains only 0s and 1s, we can flip at most k 0s to find the most consecutive ones
+///nums contains only 0s and 1s we can flip at most k 0s to find the most consecutive ones
 pub fn longest_ones(nums: Vec<i32>, k: i32) -> usize {
     let (mut l, mut r, mut zeroes) = (0, 0, 0);
     let mut max_len = 0;
@@ -65,9 +65,9 @@ pub fn longest_ones(nums: Vec<i32>, k: i32) -> usize {
     max_len
 }
 
-///We have 2 baskets and fruits[i] is a type of fruit. One basket can hold only 1 type of fruits in a sequence
+///We have two baskets and fruits[i] is a type of fruit. One basket can hold only one type of fruits in a sequence
 pub fn total_fruits(fruits: Vec<i32>) -> usize {
-    //So we need to find the max-sub-array with at most 2 different numbers
+    //So we need to find the max-subarray with at most 2 different numbers
     let (mut l, mut r) = (0, 0);
     let mut max_len = 0;
     let mut freq_map = HashMap::new();
@@ -90,7 +90,7 @@ pub fn total_fruits(fruits: Vec<i32>) -> usize {
     max_len
 }
 
-///Can replace k characters to form the longest distinct sub-string
+///Can replace k characters to form the longest distinct substring
 pub fn length_of_longest_substring_k_distinct(s: String, k: usize) -> usize {
     let (mut l, mut r) = (0, 0);
     let mut max_len = 0;
@@ -119,7 +119,7 @@ pub fn length_of_longest_substring_k_distinct(s: String, k: usize) -> usize {
 
 ///s contains only a, b and c, find the number of substrings that contain at-least one of each
 pub fn number_of_substrings(s: String) -> usize {
-    let mut last_seen = (None, None, None); //Index where (a,b,c) were last seen
+    let mut last_seen = (None, None, None); //The index where (a,b,c) is last seen
     let mut count = 0;
     let s: Vec<char> = s.chars().collect();
 
@@ -198,7 +198,7 @@ pub fn num_subarrays_with_sum(nums: Vec<i32>, goal: i32) -> usize {
     helper(&nums, goal) - helper(&nums, goal - 1)
 }
 
-///A nice sub-array is one where the number of odd integers = k
+///A nice subarray is one where the number of odd integers = k
 pub fn number_of_subarrays(nums: Vec<i32>, k: i32) -> i32 {
     //Convert every odd to 1 and even to 0, then find the subarray where the sum is k
     let nums: Vec<i32> = nums.iter().map(|&x| {
@@ -254,7 +254,7 @@ pub fn subarrays_with_k_distinct(nums: Vec<i32>, k: usize) -> i32 {
                 l += 1;
             }
 
-            count += r - l + 1; //If an array is possible, then so are it sub-arrays
+            count += r - l + 1; //If an array is possible, then so are its subarrays
             r += 1;
         }
 

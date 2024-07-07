@@ -121,7 +121,7 @@ pub fn kadane_algorithm(arr: &[i32]) -> i32 { //Finding the maximum subarray sum
     });
 
     maximum
-    //If we consider an empty subarray to have a sum of 0, if maximum < 0 return 0
+    //We consider an empty subarray to have a sum of 0 if maximum < 0 returns 0
 }
 
 pub fn find_maximum_sub_array_of_max_sum(arr: &[i32]) -> (i32, &[i32]) { //This is also Kadane's Algorithm but also finding the subarray which produces the result
@@ -433,7 +433,7 @@ pub fn majority_element(arr: Vec<i32>) -> Vec<i32> {
     ans
 }
 
-pub fn three_sum(arr: Vec<i32>) -> Vec<Vec<i32>> {//Sum of three elements should be 0
+pub fn three_sum(arr: Vec<i32>) -> Vec<Vec<i32>> { //The sum of three elements should be 0
     let mut arr = arr.clone();
     arr.sort();
     let mut ans = Vec::new();
@@ -471,7 +471,7 @@ pub fn merge_intervals(intervals: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
 
     for interval in intervals {
         let a_len = ans.len(); //This is necessary since we cannot have a mutable borrow (ans.push) and an immutable borrow at the same time
-        if ans.is_empty() || interval[0] > ans[a_len - 1][1] {//If the new interval is not in(side) any other interval
+        if ans.is_empty() || interval[0] > ans[a_len - 1][1] { //If the new interval is not in(side) any other interval
             ans.push(interval);
         } else {
             ans[a_len - 1][1] = std::cmp::max(ans[a_len - 1][1], interval[1]);
@@ -540,6 +540,34 @@ pub fn max_product(nums: Vec<i32>) -> i32 {
     }
 
     max
+}
+
+pub fn trap(height: Vec<i32>) -> i32 {
+    let (mut left, mut right) = (0, height.len() - 1);
+    let mut water = 0;
+    let (mut left_max, mut right_max) = (0, 0);
+
+    while left <= right {
+        if height[left] <= height[right] {
+            if height[left] >= left_max {
+                left_max = height[left];
+            } else {
+                water += left_max - height[left];
+            }
+
+            left += 1;
+        } else {
+            if height[right] >= right_max {
+                right_max = height[right];
+            } else {
+                water += right_max - height[right]
+            }
+
+            right -= 1;
+        }
+    }
+
+    water
 }
 
 #[cfg(test)]
@@ -746,5 +774,11 @@ mod tests {
     fn max_product_test() {
         assert_eq!(max_product(vec![2, 3, -2, 4]), 6);
         assert_eq!(max_product(vec![-2, 0, -1]), 0);
+    }
+
+    #[test]
+    fn water_trapping_test() {
+        assert_eq!(trap(vec![0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]), 6);
+        assert_eq!(trap(vec![4, 2, 0, 3, 2, 5]), 9);
     }
 }

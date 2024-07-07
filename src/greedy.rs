@@ -1,4 +1,4 @@
-//A greedy approach is one which makes the best choice available at the current moment (no consideration of future events)
+//A greedy approach is one that makes the best choice available at the current moment (no consideration of future events)
 
 //Here, greed is the greed factor of each child and cookies is the greed factor that it can satisfy
 //For a child to be content cookie >= greed
@@ -11,7 +11,7 @@ pub fn find_content_children(greed: &[i32], cookies: &[i32]) -> i32 {
     let (mut l, mut r) = (0, 0); //l points to greed and r to cookies
     while l < greed.len() && r < cookies.len() {
         if cookies[r] >= greed[l] {
-            l += 1; //If the greed is satisfied move to the next child and cookie
+            l += 1; //If the greed is satisfied, move to the next child and cookie
         }
         r += 1; //If it is not satisfied, move to the next cookie
     }
@@ -50,7 +50,7 @@ pub fn lemonade_change(bills: Vec<i32>) -> bool {
     true
 }
 
-//arr[i] is the number of places we can jump, i.e. from i to i + arr[i]
+//arr[i] is the number of places we can jump, i.e., from i to i + arr[i]
 pub fn can_jump(arr: Vec<i32>) -> bool {
     //The only obstacle is 0, so at every index we track the maximum element we can reach
     let mut max_index = 0;
@@ -84,15 +84,15 @@ pub fn jump(arr: Vec<i32>) -> i32 {
 }
 
 #[derive(Debug)]
-struct Job {
+pub struct Job {
     id: usize,
     dead: usize,
     profit: i8,
 }
 
-///We need to find the number of jobs done and the maximum profit. Only 1 job can be done each day
+///We need to find the number of jobs done and the maximum profit. Only one job can be done each day
 pub fn job_scheduling(mut jobs: Vec<Job>) -> (usize, i8) {
-    //We need to delay the job as much as profit, and complete the maximum profit job with the first deadline
+    //We need to delay the job as much as profit, and complete the maximum-profit job with the first deadline
     jobs.sort_by(|a, b| b.profit.cmp(&a.profit));
     let (mut total_profit, mut count_jobs) = (0, 0);
     let max_deadline = jobs.iter().max_by_key(|x| x.dead).unwrap().dead;
@@ -147,7 +147,7 @@ pub fn erase_overlap_intervals(mut intervals: Vec<(i32, i32)>) -> i32 {
     count
 }
 
-///Insert new_interval in intervals(non-overlapping) such that the resultant array is also non-overlapping
+///Insert new_interval in intervals (non-overlapping) such that the resultant array is also non-overlapping
 pub fn insert_intervals(intervals: Vec<(i32, i32)>, mut new_interval: (i32, i32)) -> Vec<(i32, i32)> {
     let mut ans: Vec<(i32, i32)> = Vec::new();
     let mut i = 0;
@@ -196,7 +196,7 @@ pub fn platforms(mut arrival: Vec<i32>, mut departure: Vec<i32>) -> i32 {
     max_platforms
 }
 
-///Each child must get more than 1 candy and the child with higher rating gets more
+///Each child must get more than one candy, and the child with a higher rating gets more
 pub fn candy(ratings: Vec<i32>) -> i32 {
     let mut left_neighbour = vec![0; ratings.len()];
     left_neighbour[0] = 1;
@@ -271,6 +271,39 @@ pub fn fractional_knapsack(mut weight: f64, mut items: Vec<(f64, f64)>) -> f64 {
     }
 
     profit
+}
+
+///Valid string has balanced parenthesis. A '*' can be used as '(' or ')' or ''.
+pub fn check_valid_string(s: String) -> bool {
+    let (mut min, mut max) = (0, 0);
+
+    for c in s.chars() {
+        match c {
+            '(' => {
+                min += 1;
+                max += 1;
+            }
+            ')' => {
+                if min > 0 {
+                    min -= 1;
+                }
+                max -= 1;
+            }
+            '*' => {
+                if min > 0 {
+                    min -= 1;
+                }
+                max += 1;
+            }
+            _ => {}
+        }
+
+        if max < 0 {
+            return false;
+        }
+    }
+
+    min == 0
 }
 
 #[cfg(test)]

@@ -65,7 +65,7 @@ impl<T: Copy> LinkedList<T> {
     }
     ///Delete the first node
     pub fn delete_front(&mut self) -> Result<T, &'static str> {
-        match self.head.take() { //Take head since we are 'defo' changing it
+        match self.head.take() { //Take the head since we are 'defo' changing it
             None => Err("List is empty"),//If the head is none, then the list is empty and cannot be deleted
             Some(mut old_head) => {
                 //Free is done automatically by .take()
