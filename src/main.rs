@@ -1,8 +1,7 @@
 #![feature(linked_list_retain)]
 #![allow(dead_code)]
 
-use std::cell::RefCell;
-use std::rc::Rc;
+use crate::dynamic_programming::{matrix_chain_multiplication, optimal_parenthesis};
 
 mod arrays;
 mod bit_manipulation;
@@ -19,6 +18,11 @@ mod graphs;
 mod stack_queues;
 mod expression_conversion;
 
-fn main() {
 
+fn main() {
+    let matrices = vec![3, 2, 4, 2, 5];
+    let (operations, split) = matrix_chain_multiplication(matrices);
+    let x = optimal_parenthesis(&split, 1, split.len() - 1);
+
+    println!("{}", x);
 }

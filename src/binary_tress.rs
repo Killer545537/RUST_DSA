@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::cmp::{Ordering};
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 use std::rc::Rc;
 
 /* A tree is a non-linear data structure which shows hierarchical relation between elements. It is a DAG. Each edge defines a parent-child relationship between the nodes. There a unique path from the root to each node.

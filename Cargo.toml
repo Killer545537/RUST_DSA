@@ -4,5 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-thiserror = "1.0.61"
+rayon = "1.10.0"
 itertools = "0.13.0"
+thiserror = "1.0.63"

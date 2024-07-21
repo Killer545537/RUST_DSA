@@ -4,7 +4,6 @@ It is used in recursion (recursion stack), expression evaluation (infix, prefix,
 A queue is a list of elements in which elements can be inserted from the rear and deleted from the front. It is a First-In-First-Out data structure. Push/enqueue is used for insertion and pop/dequeue for deletion.
 It is used in sharing resources, CPU scheduling, call center, etc.
  */
-use std::cmp::Ordering;
 use std::collections::{HashMap, LinkedList, VecDeque};
 use std::fmt::{Display, Formatter};
 use std::mem::take;
@@ -371,22 +370,24 @@ pub fn largest_rectangle_area(heights: Vec<i32>) -> i32 {
 
 pub fn largest_rectangle_area_optimised(heights: Vec<i32>) -> i32 {
     heights.iter().chain(&[0]).enumerate()
-        .fold((vec![], 0), |(mut v, mut ans), (i, &x)| { //Vec acts like a stack
+        .fold((vec![], 0), |(mut v, mut area), (i, &x)| { //Vec acts like a stack
             while let Some(&y) = v.last() {
                 if x > heights[y] {
                     break;
                 }
-                let height = heights[v.pop().unwrap()];
-                let temp = if let Some(&i) = v.last() {
+                let height = heights[v.pop().unwrap()]; //Height is the largest yet
+                //Right smaller is the index itself
+                let temp = if let Some(&i) = v.last() { //Left smaller
                     i as i32
                 } else {
                     -1
                 };
-                let weight = i as i32 - temp - 1;
-                ans = ans.max(height * weight);
+                //Width = Right smaller - left smaller - 1
+                let width = i as i32 - temp - 1;
+                area = area.max(height * width);
             }
             v.push(i);
-            (v, ans)
+            (v, area)
         }).1
 }
 
@@ -414,7 +415,35 @@ pub fn max_sliding_window(nums: Vec<i32>, k: usize) -> Vec<i32> {
     ans
 }
 
+fn parse_bool_expr(expression: String) -> bool {
+    let mut stack = VecDeque::new();
 
+    for c in expression.chars() {
+        match c {
+            ',' => continue,
+            '(' | 't' | 'f' | '!' | '&' | '|' => stack.push_back(c),
+            ')' => {
+                let mut content = Vec::new();
+                while let Some(top) = stack.pop_back() {
+                    if top == '(' {
+                        break;
+                    }
+                    content.push(top);
+                }
+                let result = match stack.pop_back() {
+                    Some('!') => !content.contains(&'t'),
+                    Some('&') => !content.contains(&'f'),
+                    Some('|') => content.contains(&'t'),
+                    _ => false,
+                };
+                stack.push_back(if result {'t'} else {'f'});
+            },
+            _ => {}
+        }
+    }
+
+    stack.pop_back().unwrap() == 't'
+}
 
 #[cfg(test)]
 mod tests {
@@ -537,5 +566,12 @@ mod tests {
     fn sliding_window_max_test() {
         assert_eq!(max_sliding_window(vec![1, 3, -1, -3, 5, 3, 6, 7], 3), vec![3, 3, 5, 5, 6, 7]);
         assert_eq!(max_sliding_window(vec![1], 1), vec![1]);
+    }
+
+    #[test]
+    fn parse_bool_expr_test() {
+        assert_eq!(parse_bool_expr(String::from("&(|(f))")), false);
+        assert_eq!(parse_bool_expr(String::from("|(f,f,f,t)")), true);
+        assert_eq!(parse_bool_expr(String::from("!(&(f,t))")), true);
     }
 }

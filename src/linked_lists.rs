@@ -66,7 +66,7 @@ impl<T: Copy> LinkedList<T> {
     ///Delete the first node
     pub fn delete_front(&mut self) -> Result<T, &'static str> {
         match self.head.take() { //Take the head since we are 'defo' changing it
-            None => Err("List is empty"),//If the head is none, then the list is empty and cannot be deleted
+            None => Err("List is empty"), //If the head is none, then the list is empty and cannot be deleted
             Some(mut old_head) => {
                 //Free is done automatically by .take()
                 self.head = old_head.next.take();
@@ -143,6 +143,19 @@ impl ListNode {
     }
 }
 
+trait Append {
+    fn append(self, val: i32) -> Option<Box<ListNode>>;
+}
+
+impl Append for Option<Box<ListNode>> {
+    fn append(self, val: i32) -> Option<Box<ListNode>> {
+        Some(Box::new(ListNode {
+            val,
+            next: self,
+        }))
+    }
+}
+
 ///Given two numbers in a linked list in reverse order (123 => 3->2->1->None)
 pub fn add_two_numbers(l1: Option<Box<ListNode>>, l2: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
     fn helper(l1: Option<Box<ListNode>>, l2: Option<Box<ListNode>>, carry: i32) -> Option<Box<ListNode>> {
@@ -166,4 +179,17 @@ pub fn add_two_numbers(l1: Option<Box<ListNode>>, l2: Option<Box<ListNode>>) -> 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn add_two_numbers_test() {
+        let l1 = Some(Box::new(ListNode::new(2))).append(4).append(3); //342
+        let l2 = Some(Box::new(ListNode::new(5))).append(6).append(4); //465
+        let expected = Some(Box::new(ListNode::new(8))).append(0).append(7); //342 + 465 = 708
+        assert_eq!(add_two_numbers(l1, l2), expected);
+
+        let l1 = Some(Box::new(ListNode::new(1)));
+        let l2 = Some(Box::new(ListNode::new(9))).append(9).append(9);
+        let expected = Some(Box::new(ListNode::new(1))).append(0).append(0).append(0);
+        assert_eq!(add_two_numbers(l1, l2), expected);
+    }
 }
