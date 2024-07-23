@@ -264,7 +264,7 @@ pub fn subarrays_with_k_distinct(nums: Vec<i32>, k: usize) -> i32 {
     helper(&nums, k) - helper(&nums, k - 1)
 }
 
-///Return the min sub-string which contains every character in t
+///Return the min substring which contains every character in t
 pub fn min_window(s: String, t: String) -> String {
     let s: Vec<char> = s.chars().collect();
     let t: Vec<char> = t.chars().collect();

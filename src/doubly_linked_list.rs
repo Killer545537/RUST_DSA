@@ -10,7 +10,7 @@ struct Node<T> {
      RefCell allows us to have mutable references even when there are immutable references to it
      Rc (Reference Counting) allows data to have multiple owners, the object is dropped when there are no more references
      Weak is a non-owning Rc. Weak can be upgraded to Rc by .upgrade() (-> Option if the value is still present)
-     Weak does not increase the reference count and the value is dropped when there are only Weak pointers to it
+     Weak does not increase the reference count, and the value is dropped when there are only Weak pointers to it
      Weak is used to avoid circular referencing  */
 }
 
@@ -68,7 +68,7 @@ impl<T: Copy> DoublyLinkedList<T> {
         let mut node = Node::new(value);
 
         match &mut self.tail.take() {
-            None => { //If the list is empty, same thing as before
+            None => { //If the list is empty, the same thing as before
                 self.head = node.into(); //Make the new node as the head
                 self.tail = self.head.clone(); //Make the tail as the new node as well
             }

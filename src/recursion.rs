@@ -66,7 +66,7 @@ pub fn generate_parenthesis(n: i32) -> Vec<String> {
     let mut ans = Vec::new();
     let mut s = String::new();
     fn generate(ans: &mut Vec<String>, s: &mut String, open: i32, close: i32) { //open and close are the number of remaining brackets left
-        if open == 0 && close == 0 { //If all are exhausted then it is a valid string
+        if open == 0 && close == 0 { //If all are exhausted, then it is a valid string
             ans.push(s.clone());
         }
 
@@ -77,7 +77,7 @@ pub fn generate_parenthesis(n: i32) -> Vec<String> {
         }
 
         if close > 0 {
-            if open < close { //If the number of open in the string are more, we must use a closing bracket
+            if open < close { //If the number of open in the string is more, we must use a closing bracket
                 s.push(')');
                 generate(ans, s, open, close - 1);
                 s.pop();
@@ -237,7 +237,7 @@ pub fn permute(arr: &[i32]) -> Vec<Vec<i32>> {
     ans
 }
 
-//Find all partitions which result in the substrings being palindromes
+//Find all partitions that result in the substrings being palindromes
 pub fn partition(s: String) -> Vec<Vec<String>> {
     let mut ans: Vec<Vec<String>> = Vec::new();
     let mut path: Vec<String> = Vec::new();
@@ -385,8 +385,8 @@ pub fn graph_coloring(adj_matrix: &Vec<Vec<bool>>, colors: i32) -> bool {
     solve(0, &mut color, adj_matrix, colors)
 }
 
-//Given a maze where 0 means the cell cannot be accessed
-//We need to find the path from (0,0) to end of the maze (always a square) where each cell is visited only once
+//Given a maze where 0 means the cell cannot be accessed,
+//We need to find the path from (0,0) to the end of the maze (always a square) where each cell is visited only once
 pub fn rat_in_maze(maze: &Vec<Vec<bool>>) -> Vec<String> {
     let n = maze.len();
     const DIRECTIONS: [(char, (i32, i32)); 4] = [('D', (1, 0)), ('L', (0, -1)), ('R', (0, 1)), ('U', (-1, 0))];
@@ -415,7 +415,7 @@ pub fn rat_in_maze(maze: &Vec<Vec<bool>>) -> Vec<String> {
     ans
 }
 
-//Take a set 1..=n, and find the kth permutation of it
+//Take a set 1…=n, and find the kth permutation of it
 pub fn get_permutation(n: i32, k: i32) -> String {
     let mut fact: i32 = (1..n).product(); // (n-1)! which is the number of permutations which start with 'x'
     let mut arr: Vec<i32> = (1..=n).collect();

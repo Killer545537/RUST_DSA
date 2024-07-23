@@ -3,7 +3,8 @@ use std::cmp::{Ordering};
 use std::collections::VecDeque;
 use std::rc::Rc;
 
-/* A tree is a non-linear data structure which shows hierarchical relation between elements. It is a DAG. Each edge defines a parent-child relationship between the nodes. There a unique path from the root to each node.
+/* A tree is a non-linear data structure that shows hierarchical relation between elements. It is a DAG. Each edge defines a parent-child relationship between the nodes.
+There is a unique path from the root to each node.
 The root is the top most node of a tree (it has no parent)
 The predecessor of a node is called its parent. The successor of a node is called its child (At most 2 for a binary tree)
 The nodes with no children are leaf/external nodes. Thus, a node with at least one child is called an internal node
@@ -12,7 +13,7 @@ The depth of a tree is the number of edges in the path from root to the node. (R
 The height of a tree is the number of edges in the longest path from the node to a leaf node. (Leaf nodes have height = 0)
  */
 
-/* Binary trees are trees with at most 2 children for every node
+/* Binary trees are trees with at most 2 children for every node.
 A full/proper binary tree is one where each node has either 0 or 2 children
 A complete binary tree is one where all tree levels are filled completely except the lowest level
 A prefect binary tree is one where all levels are completely filled and all leaves are at the same level
@@ -76,7 +77,7 @@ impl Node {
         }
     }
 
-    //Traversal algorithms for trees are majorly divided into Breadth First Search and Depth First Search (In-Order Traversal, Pre-Order Traversal and Post-Order Traversal)
+    //Traversal algorithms for trees are majorly divided into Breadth-First Search and Depth-First Search (In-Order Traversal, Pre-Order Traversal and Post-Order Traversal)
     ///Left Root Right. This is in-order traversal using recursion
     pub fn inorder_vector(&self) -> Vec<i32> {
         let mut res = Vec::new();

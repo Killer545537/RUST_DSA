@@ -1351,7 +1351,7 @@ pub fn number_of_lis(arr: Vec<i32>) -> i32 {
 pub fn matrix_multiplication_memoization(matrices: Vec<i32>) -> i32 {
     //The dimensions of the ith matrix is matrices[i-1] ✖️ matrices[i]
     //The number of operations to multiply two matrices (m*n) ✖️ (n*p) = m*n*p
-    ///i..j is the minimum operations to multiply from matrix i to matrix j
+    ///i...j is the minimum operations to multiply from matrix i to matrix j
     fn helper(i: usize, j: usize, matrices: &Vec<i32>, dp: &mut Vec<Vec<i32>>) -> i32 {
         if i == j { //Base Case
             return 0; //No operations for single matrix
@@ -1601,8 +1601,8 @@ pub fn maximal_rectangle(matrix: Vec<Vec<char>>) -> i32 {
 
 pub fn count_squares(matrix: Vec<Vec<i32>>) -> i32 {
     let mut dp = vec![vec![0; matrix[0].len()]; matrix.len()];
-    dp[0] = matrix[0].clone(); //Copy first row
-    for i in 1..matrix.len() { //Copy first column
+    dp[0] = matrix[0].clone(); //Copy the first row
+    for i in 1..matrix.len() { //Copy the first column
         dp[i][0] = matrix[i][0];
     }
 
